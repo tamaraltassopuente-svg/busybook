@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RENOMBRAR IMÁGENES · BUSY BOOK</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="tailwind-config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  .archivo{ text-transform:none !important; font-family:ui-monospace,monospace; }
+  .cuadros{ background-image:
+      linear-gradient(45deg,#eef2f6 25%,transparent 25%,transparent 75%,#eef2f6 75%),
+      linear-gradient(45deg,#eef2f6 25%,transparent 25%,transparent 75%,#eef2f6 75%);
+    background-size:14px 14px; background-position:0 0,7px 7px; }
+  .listo{ border-color:#22C55E !important; background:#f0fdf4; }
+  .repetido{ border-color:#EF4444 !important; background:#fef2f2; }
+</style>
+</head>
+<body class="font-cuerpo bg-crema text-tinta p-3 sm:p-6">
+<div class="max-w-6xl mx-auto space-y-5">
+
+  <header class="text-center">
+    <h1 class="font-titulo font-extrabold text-2xl sm:text-4xl">🏷️ PONERLE NOMBRE A TUS IMÁGENES</h1>
+    <p class="font-bold text-tinta/60 mt-2 max-w-3xl mx-auto">
+      Encontré <b id="cuantas">44</b> imágenes tuyas en <span class="archivo">img/propias</span>.
+      Debajo de cada una escribí qué es. Cuando termines, un solo botón las renombra todas.
+    </p>
+  </header>
+
+  <!-- BARRA FIJA DE ACCIONES -->
+  <div class="sticky top-0 z-40 bg-white rounded-3xl p-4 shadow-lg border-4 border-cielo">
+    <div class="flex flex-wrap gap-3 items-center justify-center">
+      <span id="progreso" class="font-titulo font-extrabold text-lg"></span>
+      <button id="bRenombrar" class="btn3d bg-verde rounded-2xl px-5 py-3 font-titulo font-extrabold">
+        ✅ RENOMBRAR TODAS AHORA
+      </button>
+      <button id="bBat" class="btn3d bg-amarillo rounded-2xl px-5 py-3 font-titulo font-extrabold">
+        ⬇️ BAJAR EL RENOMBRADOR
+      </button>
+      <span id="aviso" class="font-titulo font-bold text-sm"></span>
+    </div>
+    <p class="text-center font-bold text-tinta/50 text-xs mt-2">
+      "RENOMBRAR AHORA" funciona en CHROME y EDGE (te va a pedir permiso sobre la carpeta img/propias).
+      Si no te deja, usá "BAJAR EL RENOMBRADOR": te descarga un archivo, le hacés doble clic y listo.
+    </p>
+  </div>
+
+  <div id="grilla" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+
+  <div class="h-10"></div>
+</div>
+
+<script src="banco-palabras.js"></script>
+<script src="motor.js"></script>
+<script src="_lista-imagenes.js"></script>
+<script>
+/* ==================================================================
+   OPCIONES: primero las 33 recomendadas, después todo el banco
+   ================================================================== */
+const RECOMENDADAS = [
+  'MATE','TERMO','BOMBILLA','ALFAJOR','MEDIALUNA','FACTURAS','CHIPÁ','BIZCOCHITOS',
+  'MILANESA','EMPANADA','TRICERATOPS','BRONTOSAURIO','VELOCIRAPTOR','PTERODÁCTILO',
+  'ESTEGOSAURIO','PIZARRÓN','CARTUCHERA','PLASTICOLA','GUARDAPOLVO','TIZA','PLASTILINA',
+  'SUBIBAJA','CALESITA','PELOTERO','HAMACA','COLECTIVO','SUBTE'
+].map(t => ({ titulo:t, archivo:Img.slug(t), reco:true }));
+
+const ESPECIALES = [
+  { titulo:'DULCE DE LECHE', archivo:'dulce-de-leche', reco:true },
+  { titulo:'ESCENA · LA PLAZA',  archivo:'escena-plaza',  reco:true, escena:true },
+  { titulo:'ESCENA · LA GRANJA', archivo:'escena-granja', reco:true, escena:true },
+  { titulo:'ESCENA · LA SELVA',  archivo:'escena-selva',  reco:true, escena:true },
+  { titulo:'ESCENA · EL MAR',    archivo:'escena-mar',    reco:true, escena:true },
+  { titulo:'ESCENA · MI CUARTO', archivo:'escena-cuarto', reco:true, escena:true }
+];
+
+const DEL_BANCO = BANCO.PALABRAS
+  .map(p => ({ titulo:p.texto, archivo:Img.slug(p.texto) }))
+  .filter((v,i,a) => a.findIndex(x => x.archivo === v.archivo) === i);
+
+const OPCIONES = [...RECOMENDADAS, ...ESPECIALES,
+  ...DEL_BANCO.filter(d => ![...RECOMENDADAS, ...ESPECIALES].some(r => r.archivo === d.archivo))];
+
+document.body.insertAdjacentHTML('beforeend',
+  `<datalist id="ops">${OPCIONES.map(o => `<option value="${o.titulo}">`).join('')}</datalist>`);
+
+/* ==================================================================
+   GRILLA
+   ================================================================== */
+const IMGS = window.IMAGENES_EN_CARPETA;
+document.getElementById('cuantas').textContent = IMGS.length;
+
+/** Si el archivo ya tiene nombre bueno, lo damos por hecho */
+function yaTieneNombre(archivo){
+  const base = archivo.replace(/\.png$/i, '');
+  return OPCIONES.find(o => o.archivo === base) || null;
+}
+
+document.getElementById('grilla').innerHTML = IMGS.map((im, i) => {
+  const ya = yaTieneNombre(im.archivo);
+  const esGemini = /^Gemini_Generated/i.test(im.archivo);
+  return `
+  <div class="bb-item bg-white rounded-3xl p-3 shadow border-4 border-tinta/10" data-i="${i}">
+    <img src="img/propias/${im.archivo}" class="cuadros w-full aspect-square object-contain rounded-2xl">
+    <p class="archivo text-[10px] text-tinta/40 mt-2 truncate" title="${im.archivo}">${im.archivo}</p>
+    ${im.horizontal ? `<p class="text-xs font-titulo font-extrabold text-lila">🧩 HORIZONTAL → ES UNA ESCENA DE PUZLE</p>` : ''}
+    <input list="ops" class="bb-nom w-full rounded-2xl border-4 border-cielo p-2 mt-1 font-titulo font-extrabold"
+      placeholder="¿QUÉ ES?" value="${ya ? ya.titulo : ''}" ${esGemini ? '' : 'data-listo="1"'}>
+    <p class="bb-dest archivo text-xs text-tinta/50 mt-1">—</p>
+  </div>`;
+}).join('');
+
+const items = [...document.querySelectorAll('.bb-item')];
+
+function destinoDe(input){
+  const t = input.value.trim().toUpperCase();
+  if (!t) return null;
+  const ex = OPCIONES.find(o => o.titulo === t);
+  return ex ? ex.archivo : Img.slug(t);
+}
+
+function refrescar(){
+  const usados = {};
+  items.forEach(it => {
+    const d = destinoDe(it.querySelector('.bb-nom'));
+    if (d) usados[d] = (usados[d] || 0) + 1;
+  });
+
+  let hechos = 0, repes = 0;
+  items.forEach(it => {
+    const inp = it.querySelector('.bb-nom');
+    const p   = it.querySelector('.bb-dest');
+    const d   = destinoDe(inp);
+    it.classList.remove('listo','repetido');
+    if (!d){ p.textContent = '—'; return; }
+    hechos++;
+    p.textContent = d + '.png';
+    if (usados[d] > 1){ it.classList.add('repetido'); p.textContent += '  ⚠️ REPETIDO'; repes++; }
+    else it.classList.add('listo');
+  });
+
+  document.getElementById('progreso').innerHTML =
+    `<span class="text-verde">${hechos}</span><span class="text-tinta/40">/${items.length} CON NOMBRE</span>`;
+  document.getElementById('aviso').innerHTML = repes
+    ? `<span class="text-red-500">⚠️ HAY ${repes} NOMBRES REPETIDOS</span>`
+    : (hechos === items.length ? '<span class="text-verde">TODO LISTO ✅</span>' : '');
+  return { hechos, repes };
+}
+
+items.forEach(it => it.querySelector('.bb-nom').addEventListener('input', refrescar));
+refrescar();
+
+/** Los cambios que hay que aplicar */
+function planDeCambios(){
+  return items.map(it => {
+    const i = +it.dataset.i;
+    const desde = IMGS[i].archivo;
+    const d = destinoDe(it.querySelector('.bb-nom'));
+    return d ? { desde, hasta: d + '.png' } : null;
+  }).filter(c => c && c.desde !== c.hasta);
+}
+
+/* ==================================================================
+   OPCIÓN A · RENOMBRAR DIRECTO (Chrome / Edge)
+   ================================================================== */
+document.getElementById('bRenombrar').addEventListener('click', async () => {
+  const { repes } = refrescar();
+  if (repes){ alert('HAY NOMBRES REPETIDOS. CORREGILOS PRIMERO.'); return; }
+  const plan = planDeCambios();
+  if (!plan.length){ alert('NO HAY NADA PARA RENOMBRAR.'); return; }
+  if (!window.showDirectoryPicker){
+    alert('TU NAVEGADOR NO LO PERMITE.\nUSÁ EL BOTÓN "BAJAR EL RENOMBRADOR".');
+    return;
+  }
+  if (!confirm('SE VAN A RENOMBRAR ' + plan.length + ' IMÁGENES.\n\n' +
+               'EN LA VENTANA QUE SIGUE, ELEGÍ LA CARPETA:\nimg → propias')) return;
+
+  try {
+    const dir = await showDirectoryPicker({ mode:'readwrite' });
+    let ok = 0, fallos = [];
+    for (const c of plan){
+      try {
+        const fh   = await dir.getFileHandle(c.desde);
+        const file = await fh.getFile();
+        const nh   = await dir.getFileHandle(c.hasta, { create:true });
+        const w    = await nh.createWritable();
+        await w.write(await file.arrayBuffer());
+        await w.close();
+        await dir.removeEntry(c.desde);
+        ok++;
+      } catch(e){ fallos.push(c.desde + ': ' + e.message); }
+    }
+    alert('LISTO.\n\nRENOMBRADAS: ' + ok +
+          (fallos.length ? '\n\nFALLARON:\n' + fallos.join('\n') : '') +
+          '\n\nRECARGÁ ESTA PÁGINA PARA VER EL RESULTADO.');
+  } catch(e){
+    alert('NO SE PUDO ACCEDER A LA CARPETA: ' + e.message);
+  }
+});
+
+/* ==================================================================
+   OPCIÓN B · BAJAR UN .BAT QUE HACE EL TRABAJO
+   ================================================================== */
+document.getElementById('bBat').addEventListener('click', () => {
+  const { repes } = refrescar();
+  if (repes){ alert('HAY NOMBRES REPETIDOS. CORREGILOS PRIMERO.'); return; }
+  const plan = planDeCambios();
+  if (!plan.length){ alert('NO HAY NADA PARA RENOMBRAR.'); return; }
+
+  const lineas = [
+    '@echo off',
+    'chcp 65001 >nul',
+    'cd /d "%~dp0img\\propias"',
+    'echo.',
+    'echo  Renombrando ' + plan.length + ' imagenes...',
+    'echo.',
+    ...plan.map(c =>
+      'if exist "' + c.desde + '" ( ren "' + c.desde + '" "' + c.hasta + '" && echo   OK  ' + c.hasta + ' )'),
+    'echo.',
+    'echo  Listo. Ya podes cerrar esta ventana.',
+    'echo.',
+    'pause'
+  ].join('\r\n');
+
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([lineas], { type:'text/plain' }));
+  a.download = 'RENOMBRAR-IMAGENES.bat';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+
+  document.getElementById('aviso').innerHTML =
+    '<span class="text-verde">⬇️ DESCARGADO · MOVELO A LA CARPETA TAM Y HACELE DOBLE CLIC</span>';
+});
+</script>
+</body>
+</html>

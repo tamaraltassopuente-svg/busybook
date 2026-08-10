@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CARGAR IMÁGENES · BUSY BOOK</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="tailwind-config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+<style>
+  /* Acá sí queremos minúsculas: son nombres de archivo */
+  .archivo{ text-transform: none !important; font-family: ui-monospace, monospace; }
+  #soltar.encima{ background:#86EFAC; border-color:#22C55E; }
+  .cuadros{ background-image:
+      linear-gradient(45deg,#e2e8f0 25%,transparent 25%,transparent 75%,#e2e8f0 75%),
+      linear-gradient(45deg,#e2e8f0 25%,transparent 25%,transparent 75%,#e2e8f0 75%);
+    background-size:16px 16px; background-position:0 0,8px 8px; }
+</style>
+</head>
+<body class="font-cuerpo bg-crema text-tinta p-3 sm:p-6">
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <header class="text-center">
+    <h1 class="font-titulo font-extrabold text-2xl sm:text-4xl">🎨 CARGAR TUS IMÁGENES</h1>
+    <p class="font-bold text-tinta/60 mt-2 max-w-2xl mx-auto">
+      Sí: cada imagen tiene que llamarse igual que la palabra. Pero no lo hagas a mano —
+      esta página le pone el nombre correcto sola.
+    </p>
+  </header>
+
+  <!-- ========== PASO 1 · CONECTAR LA CARPETA ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-2">PASO 1 · CONECTAR LA CARPETA (OPCIONAL)</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      Si usás Chrome o Edge, podés darle permiso a esta página para guardar directo en
+      <span class="archivo bg-crema px-1 rounded">img/propias</span> y no tocás nada más.
+      Si no, las imágenes se descargan con el nombre correcto y las movés vos.
+    </p>
+    <div class="flex flex-wrap gap-3 items-center">
+      <button id="bCarpeta" class="btn3d bg-cielo rounded-3xl px-5 py-4 font-titulo font-extrabold">
+        📂 CONECTAR img/propias
+      </button>
+      <span id="estadoCarpeta" class="font-titulo font-bold text-tinta/60"></span>
+    </div>
+  </section>
+
+  <!-- ========== PASO 2 · SOLTAR IMÁGENES ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-2">PASO 2 · SOLTÁ TUS IMÁGENES ACÁ</h2>
+    <div id="soltar"
+      class="border-4 border-dashed border-cielo rounded-3xl p-10 text-center cursor-pointer transition-colors">
+      <div class="text-6xl mb-2">🖼️</div>
+      <p class="font-titulo font-extrabold text-xl">ARRASTRÁ LAS IMÁGENES</p>
+      <p class="font-bold text-tinta/50 text-sm mt-1">O TOCÁ PARA ELEGIRLAS · PNG, JPG O WEBP · VARIAS A LA VEZ</p>
+      <input id="archivo" type="file" accept="image/*" multiple class="hidden">
+    </div>
+    <div id="lista" class="mt-5 space-y-4"></div>
+  </section>
+
+  <!-- ========== PASO 3 · QUÉ FALTA ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">PASO 3 · LAS 33 RECOMENDADAS</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      Estas son las que más suman porque Twemoji no tiene nada parecido.
+      Verde = ya la tenés. Los prompts están en PROMPTS-IMAGENES-IA.md
+    </p>
+    <div class="flex flex-wrap gap-3 mb-4">
+      <button id="bRevisar" class="btn3d bg-amarillo rounded-2xl px-4 py-3 font-titulo font-extrabold">
+        🔄 REVISAR QUÉ HAY
+      </button>
+      <span id="contador" class="font-titulo font-extrabold text-lg self-center"></span>
+    </div>
+    <div id="checklist" class="grid gap-2 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </section>
+
+  <div class="h-10"></div>
+</div>
+
+<script src="banco-palabras.js"></script>
+<script src="motor.js"></script>
+<script>
+/* ==================================================================
+   LAS 33 RECOMENDADAS (mismas que PROMPTS-IMAGENES-IA.md)
+   Las escenas de puzle no son palabras del banco: van con nombre fijo.
+   ================================================================== */
+const RECOMENDADAS = [
+  { g:'🧉 COMIDAS ARGENTINAS', items:[
+    'MATE','TERMO','BOMBILLA','ALFAJOR','MEDIALUNA','FACTURAS','CHIPÁ',
+    'BIZCOCHITOS','MILANESA','EMPANADA',{ f:'dulce-de-leche', t:'DULCE DE LECHE' }] },
+  { g:'🦖 DINOSAURIOS', items:[
+    'TRICERATOPS','BRONTOSAURIO','VELOCIRAPTOR','PTERODÁCTILO','ESTEGOSAURIO'] },
+  { g:'🎒 ESCUELA ARGENTINA', items:[
+    'PIZARRÓN','CARTUCHERA','PLASTICOLA','GUARDAPOLVO','TIZA','PLASTILINA'] },
+  { g:'🎠 PLAZA', items:['SUBIBAJA','CALESITA','PELOTERO','HAMACA'] },
+  { g:'🚌 TRANSPORTE', items:['COLECTIVO','SUBTE'] },
+  { g:'🧩 ESCENAS PARA PUZLES', items:[
+    { f:'escena-plaza',  t:'LA PLAZA' },  { f:'escena-granja', t:'LA GRANJA' },
+    { f:'escena-selva',  t:'LA SELVA' },  { f:'escena-mar',    t:'EL MAR' },
+    { f:'escena-cuarto', t:'MI CUARTO' }] }
+];
+
+/** Todo lo recomendado, aplanado: { archivo, titulo } */
+const PLANA = RECOMENDADAS.flatMap(g => g.items.map(it =>
+  typeof it === 'string'
+    ? { archivo: Img.slug(it), titulo: it }
+    : { archivo: it.f, titulo: it.t }
+));
+
+/* Todas las palabras del banco, para el buscador */
+const TODAS = BANCO.PALABRAS
+  .map(p => ({ archivo: Img.slug(p.texto), titulo: p.texto }))
+  .filter((v, i, a) => a.findIndex(x => x.archivo === v.archivo) === i);
+
+const OPCIONES = [...PLANA, ...TODAS.filter(t => !PLANA.some(p => p.archivo === t.archivo))];
+
+/* ==================================================================
+   CARPETA DESTINO (File System Access API, solo Chrome/Edge)
+   ================================================================== */
+let carpeta = null;
+const estadoCarpeta = document.getElementById('estadoCarpeta');
+
+if (!window.showDirectoryPicker){
+  document.getElementById('bCarpeta').disabled = true;
+  document.getElementById('bCarpeta').classList.add('opacity-40');
+  estadoCarpeta.textContent = 'TU NAVEGADOR NO LO PERMITE → LAS IMÁGENES SE VAN A DESCARGAR';
+}
+
+document.getElementById('bCarpeta').addEventListener('click', async () => {
+  try {
+    carpeta = await showDirectoryPicker({ mode:'readwrite' });
+    estadoCarpeta.innerHTML = '✅ CONECTADA: <b class="archivo">' + carpeta.name + '</b>';
+    revisar();
+  } catch(e){
+    estadoCarpeta.textContent = 'NO SE CONECTÓ. LAS IMÁGENES SE VAN A DESCARGAR.';
+  }
+});
+
+/* ==================================================================
+   RECIBIR ARCHIVOS
+   ================================================================== */
+const soltar = document.getElementById('soltar');
+const inputArchivo = document.getElementById('archivo');
+const lista = document.getElementById('lista');
+
+soltar.addEventListener('click', () => inputArchivo.click());
+inputArchivo.addEventListener('change', e => recibir([...e.target.files]));
+['dragenter','dragover'].forEach(ev => soltar.addEventListener(ev, e => {
+  e.preventDefault(); soltar.classList.add('encima');
+}));
+['dragleave','drop'].forEach(ev => soltar.addEventListener(ev, e => {
+  e.preventDefault(); soltar.classList.remove('encima');
+}));
+soltar.addEventListener('drop', e => {
+  recibir([...e.dataTransfer.files].filter(f => f.type.startsWith('image/')));
+});
+
+function recibir(archivos){
+  archivos.forEach(agregarTarjeta);
+}
+
+/* ==================================================================
+   UNA TARJETA POR IMAGEN
+   ================================================================== */
+let contadorId = 0;
+
+function agregarTarjeta(file){
+  const id = 'im' + (contadorId++);
+  const url = URL.createObjectURL(file);
+
+  // Adivinamos la palabra por el nombre del archivo original
+  const pista = Img.slug(file.name.replace(/\.[^.]+$/, ''));
+  const adivinada = OPCIONES.find(o => o.archivo === pista) ||
+                    OPCIONES.find(o => pista && o.archivo.startsWith(pista));
+
+  const div = document.createElement('div');
+  div.className = 'bg-crema rounded-3xl p-4 border-4 border-tinta/10 flex flex-wrap gap-4 items-center';
+  div.innerHTML = `
+    <img src="${url}" class="cuadros w-28 h-28 object-contain rounded-2xl border-2 border-tinta/10">
+    <div class="flex-1 min-w-[15rem] space-y-2">
+      <label class="block">
+        <span class="font-titulo font-extrabold text-sm">¿QUÉ ES ESTA IMAGEN?</span>
+        <input list="opciones-palabras" id="${id}-sel" value="${adivinada ? adivinada.titulo : ''}"
+          placeholder="ESCRIBÍ LA PALABRA. EJ: MATE"
+          class="w-full rounded-2xl border-4 border-cielo p-3 font-titulo font-extrabold text-lg mt-1">
+      </label>
+      <p class="text-sm font-bold">SE VA A GUARDAR COMO:
+        <span id="${id}-nombre" class="archivo bg-white px-2 py-1 rounded border-2 border-tinta/10">—</span></p>
+      <label class="flex items-center gap-2 font-titulo font-bold text-sm">
+        <input type="checkbox" id="${id}-fondo" class="w-5 h-5 accent-verde" checked>
+        QUITAR EL FONDO BLANCO
+      </label>
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button id="${id}-guardar" class="btn3d bg-verde rounded-2xl px-4 py-3 font-titulo font-extrabold">
+          💾 GUARDAR
+        </button>
+        <button id="${id}-quitar" class="btn3d bg-white border-2 border-tinta/10 rounded-2xl px-4 py-3 font-titulo font-bold">
+          QUITAR
+        </button>
+        <span id="${id}-msg" class="self-center font-titulo font-extrabold text-sm"></span>
+      </div>
+    </div>`;
+  lista.appendChild(div);
+
+  const sel    = div.querySelector(`#${id}-sel`);
+  const nombre = div.querySelector(`#${id}-nombre`);
+  const msg    = div.querySelector(`#${id}-msg`);
+
+  function archivoDe(){
+    const t = sel.value.trim().toUpperCase();
+    if (!t) return null;
+    const exacta = OPCIONES.find(o => o.titulo === t);
+    return exacta ? exacta.archivo : Img.slug(t);
+  }
+  function refrescar(){
+    const a = archivoDe();
+    nombre.textContent = a ? a + '.png' : '—';
+  }
+  sel.addEventListener('input', refrescar);
+  refrescar();
+
+  div.querySelector(`#${id}-quitar`).addEventListener('click', () => {
+    URL.revokeObjectURL(url); div.remove();
+  });
+
+  div.querySelector(`#${id}-guardar`).addEventListener('click', async () => {
+    const a = archivoDe();
+    if (!a){ msg.textContent = '⚠️ PONÉ LA PALABRA'; msg.className = 'self-center font-titulo font-extrabold text-sm text-red-500'; return; }
+    msg.textContent = 'PROCESANDO…'; msg.className = 'self-center font-titulo font-extrabold text-sm text-tinta/50';
+    try {
+      const blob = await normalizar(file, div.querySelector(`#${id}-fondo`).checked);
+      if (carpeta){
+        const h = await carpeta.getFileHandle(a + '.png', { create:true });
+        const w = await h.createWritable();
+        await w.write(blob); await w.close();
+        msg.textContent = '✅ GUARDADA EN LA CARPETA';
+      } else {
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(blob);
+        enlace.download = a + '.png';
+        enlace.click();
+        setTimeout(() => URL.revokeObjectURL(enlace.href), 4000);
+        msg.textContent = '⬇️ DESCARGADA · MOVELA A img/propias';
+      }
+      msg.className = 'self-center font-titulo font-extrabold text-sm text-verde';
+      revisar();
+    } catch(e){
+      msg.textContent = '❌ ' + e.message;
+      msg.className = 'self-center font-titulo font-extrabold text-sm text-red-500';
+    }
+  });
+}
+
+/* Lista de sugerencias para el buscador */
+document.body.insertAdjacentHTML('beforeend',
+  `<datalist id="opciones-palabras">${OPCIONES.map(o => `<option value="${o.titulo}">`).join('')}</datalist>`);
+
+/* ==================================================================
+   NORMALIZAR: 512×512 PNG, centrada, con fondo transparente
+   ------------------------------------------------------------------
+   El borrado de fondo NO usa "todo lo blanco fuera": eso agujerearía
+   las partes blancas del dibujo (los ojos, la crema del alfajor).
+   Va desde los bordes hacia adentro, así solo saca el fondo real.
+   ================================================================== */
+function normalizar(file, quitarFondo){
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const L = 512;
+      const cv = document.createElement('canvas');
+      cv.width = cv.height = L;
+      const cx = cv.getContext('2d');
+
+      // Centrar respetando la proporción
+      const esc = Math.min(L / img.width, L / img.height);
+      const w = img.width * esc, h = img.height * esc;
+      cx.drawImage(img, (L - w) / 2, (L - h) / 2, w, h);
+
+      if (quitarFondo) borrarFondo(cx, L, L);
+      cv.toBlob(b => b ? resolve(b) : reject(new Error('NO SE PUDO CONVERTIR')), 'image/png');
+    };
+    img.onerror = () => reject(new Error('NO SE PUDO LEER LA IMAGEN'));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+function borrarFondo(cx, W, H, tol = 26){
+  const d = cx.getImageData(0, 0, W, H), px = d.data;
+  const claro = i => px[i] > 255 - tol && px[i+1] > 255 - tol && px[i+2] > 255 - tol;
+  const visto = new Uint8Array(W * H);
+  const cola = [];
+
+  // Arrancamos desde los 4 bordes
+  for (let x = 0; x < W; x++){ cola.push(x); cola.push((H-1)*W + x); }
+  for (let y = 0; y < H; y++){ cola.push(y*W); cola.push(y*W + W-1); }
+
+  while (cola.length){
+    const p = cola.pop();
+    if (p < 0 || p >= W*H || visto[p]) continue;
+    const i = p * 4;
+    if (px[i+3] !== 0 && !claro(i)) continue;   // llegamos al dibujo: paramos
+    visto[p] = 1;
+    px[i+3] = 0;                                // transparente
+    const x = p % W, y = (p - x) / W;
+    if (x > 0)     cola.push(p - 1);
+    if (x < W - 1) cola.push(p + 1);
+    if (y > 0)     cola.push(p - W);
+    if (y < H - 1) cola.push(p + W);
+  }
+  cx.putImageData(d, 0, 0);
+}
+
+/* ==================================================================
+   QUÉ FALTA
+   ================================================================== */
+async function existe(archivo){
+  if (carpeta){
+    try { await carpeta.getFileHandle(archivo + '.png'); return true; } catch(e){ return false; }
+  }
+  try {
+    const r = await fetch('img/propias/' + archivo + '.png?t=' + Math.random(), { method:'GET' });
+    return r.ok;
+  } catch(e){ return false; }
+}
+
+async function revisar(){
+  const cl = document.getElementById('checklist');
+  cl.innerHTML = '<p class="font-bold text-tinta/50">REVISANDO…</p>';
+  const estados = {};
+  for (const it of PLANA) estados[it.archivo] = await existe(it.archivo);
+  const hechas = Object.values(estados).filter(Boolean).length;
+
+  document.getElementById('contador').innerHTML =
+    `<span class="${hechas ? 'text-verde' : 'text-tinta/40'}">${hechas}</span>
+     <span class="text-tinta/40">/ ${PLANA.length} LISTAS</span>`;
+
+  cl.innerHTML = RECOMENDADAS.map(g => `
+    <div class="bg-crema rounded-2xl p-3 border-2 border-tinta/10">
+      <p class="font-titulo font-extrabold text-sm mb-2">${g.g}</p>
+      ${g.items.map(it => {
+        const o = typeof it === 'string' ? { archivo:Img.slug(it), titulo:it } : { archivo:it.f, titulo:it.t };
+        const ok = estados[o.archivo];
+        return `<div class="flex items-center gap-2 text-sm py-0.5">
+          <span>${ok ? '✅' : '⬜'}</span>
+          <span class="${ok ? 'text-verde font-bold' : 'text-tinta/60'}">${o.titulo}</span>
+          <span class="archivo text-[10px] text-tinta/30 ml-auto">${o.archivo}.png</span>
+        </div>`;
+      }).join('')}
+    </div>`).join('');
+}
+
+document.getElementById('bRevisar').addEventListener('click', revisar);
+revisar();
+</script>
+</body>
+</html>
