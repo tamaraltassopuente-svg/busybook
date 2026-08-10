@@ -1,0 +1,17 @@
+# Cosas que NO se suben a GitHub
+
+# El servidor local es solo para previsualizar en la compu.
+# En GitHub Pages no hace falta.
+_servidor-local.js
+
+# Basura de Windows y de los editores
+Thumbs.db
+desktop.ini
+.DS_Store
+*.tmp
+*.bak
+~$*
+
+# Carpetas de trabajo que no van publicadas
+/borradores/
+/originales-ia/

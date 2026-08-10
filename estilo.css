@@ -1,0 +1,74 @@
+/* ==================================================================
+   BUSY BOOK DIGITAL · ESTILO COMPARTIDO
+   Lo usan los 8 archivos. Se carga con:
+   <link rel="stylesheet" href="estilo.css">
+   ================================================================== */
+
+/* REGLA DEL PROYECTO: todo el texto visible va en MAYÚSCULAS.
+   Los strings ya están en mayúsculas en los datos; esto es la red
+   de seguridad para que nunca se escape una minúscula. */
+body{
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Los <select> y los <input> no heredan bien el text-transform */
+select, input, button, textarea{ text-transform: uppercase; }
+
+.no-sel{
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Botón con sombra sólida que se hunde al presionar.
+   Pensado para dedos: no depende de :hover. */
+.btn3d{
+  box-shadow: 0 6px 0 rgba(0,0,0,.18);
+  transition: transform .08s, box-shadow .08s;
+}
+.btn3d:active{
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgba(0,0,0,.18);
+}
+
+/* Error: sacude pero no bloquea. Nunca frustramos al chico. */
+.shake{ animation: shake .4s ease; }
+@keyframes shake{
+  0%,100%{ transform: translateX(0) }
+  20%{ transform: translateX(-9px) }
+  50%{ transform: translateX(9px) }
+  80%{ transform: translateX(-5px) }
+}
+
+/* Acierto: aparece con rebote */
+.pop{ animation: pop .45s cubic-bezier(.2,1.6,.4,1); }
+@keyframes pop{
+  0%{ transform: scale(.3) }
+  65%{ transform: scale(1.18) }
+  100%{ transform: scale(1) }
+}
+
+.flota{ animation: flota 2.6s ease-in-out infinite; }
+@keyframes flota{
+  0%,100%{ transform: translateY(0) }
+  50%{ transform: translateY(-7px) }
+}
+
+.brilla{ animation: brilla 1.3s ease-in-out infinite; }
+@keyframes brilla{
+  0%,100%{ filter: brightness(1) }
+  50%{ filter: brightness(1.25) }
+}
+
+/* El canvas de caligrafía no debe hacer scroll al trazar */
+canvas.trazo{ touch-action: none; }
+
+/* Bancos de fichas que scrollean de costado en celular */
+.scroll-x{ -webkit-overflow-scrolling: touch; overflow-x: auto; }
+
+/* Respeta a quien tenga las animaciones desactivadas en el sistema */
+@media (prefers-reduced-motion: reduce){
+  .flota, .brilla{ animation: none; }
+}

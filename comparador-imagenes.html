@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COMPARADOR DE IMÁGENES · BUSY BOOK</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = { theme:{ extend:{
+    colors:{ cielo:'#7DD3FC', rosa:'#F9A8D4', amarillo:'#FDE68A', verde:'#86EFAC',
+             lila:'#C4B5FD', naranja:'#FDBA74', crema:'#FFFBEB', tinta:'#334155' },
+    fontFamily:{ titulo:['"Baloo 2"','system-ui','sans-serif'], cuerpo:['Nunito','system-ui','sans-serif'] }
+  }}}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+  body{ -webkit-tap-highlight-color:transparent; }
+  .btn3d{ box-shadow:0 6px 0 rgba(0,0,0,.18); transition:transform .08s, box-shadow .08s; }
+  .btn3d:active{ transform:translateY(4px); box-shadow:0 2px 0 rgba(0,0,0,.18); }
+  .celda img{ width:100%; height:100%; object-fit:contain; }
+  .roto{ opacity:.25; }
+  th{ position:sticky; top:0; z-index:10; }
+</style>
+</head>
+<body class="font-cuerpo bg-crema text-tinta p-3 sm:p-6">
+
+<div class="max-w-6xl mx-auto">
+
+  <header class="text-center mb-6">
+    <h1 class="font-titulo font-extrabold text-2xl sm:text-4xl uppercase">Comparador de imágenes</h1>
+    <p class="font-bold text-tinta/60 mt-2 max-w-3xl mx-auto">
+      Los mismos 16 dibujos en las 4 opciones. Mirá esta página <b>en la compu y en el celular</b>:
+      vas a ver que la columna "EMOJI DEL SISTEMA" cambia de un aparato al otro, y las otras no.
+    </p>
+  </header>
+
+  <!-- ============ TAMAÑO ============ -->
+  <div class="bg-white rounded-3xl p-4 shadow mb-6 flex flex-wrap items-center justify-center gap-4">
+    <span class="font-titulo font-extrabold uppercase">Tamaño</span>
+    <input id="tam" type="range" min="40" max="140" value="80" class="w-64 accent-rosa">
+    <span id="tamTxt" class="font-titulo font-extrabold w-16">80px</span>
+  </div>
+
+  <!-- ============ TABLA COMPARATIVA ============ -->
+  <div class="bg-white rounded-3xl shadow overflow-hidden mb-8">
+    <div class="overflow-x-auto">
+      <table class="w-full text-center border-collapse min-w-[46rem]">
+        <thead>
+          <tr class="font-titulo font-extrabold uppercase text-sm sm:text-base">
+            <th class="bg-white p-3 text-left">Palabra</th>
+            <th class="bg-cielo p-3">1 · OpenMoji<br><span class="text-xs font-bold normal-case">ilustrado, con contorno</span></th>
+            <th class="bg-amarillo p-3">2 · Twemoji<br><span class="text-xs font-bold normal-case">plano y prolijo</span></th>
+            <th class="bg-rosa p-3">3 · Emoji del sistema<br><span class="text-xs font-bold normal-case">cambia según el aparato</span></th>
+            <th class="bg-verde p-3">4 · SVG a mano<br><span class="text-xs font-bold normal-case">dibujado en el código</span></th>
+          </tr>
+        </thead>
+        <tbody id="filas" class="font-titulo font-bold"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ============ ESTADO DE CARGA ============ -->
+  <div id="estado" class="bg-white rounded-3xl p-4 shadow mb-8 font-bold text-sm"></div>
+
+  <!-- ============ CÓMO SE VE DENTRO DEL JUEGO ============ -->
+  <div class="bg-white rounded-3xl p-4 sm:p-6 shadow mb-8">
+    <h2 class="font-titulo font-extrabold text-xl sm:text-2xl uppercase text-center mb-1">
+      Cómo se ve dentro del juego
+    </h2>
+    <p class="text-center font-bold text-tinta/60 mb-5">La misma pantalla de "ARMÁ LA PALABRA" con cada estilo</p>
+    <div id="previews" class="grid gap-5 sm:grid-cols-2"></div>
+  </div>
+
+  <!-- ============ OPCIÓN 4: IA ============ -->
+  <div class="bg-white rounded-3xl p-4 sm:p-6 shadow mb-8 border-4 border-lila">
+    <h2 class="font-titulo font-extrabold text-xl sm:text-2xl uppercase mb-3">🎨 Opción 5 · Imágenes hechas con IA</h2>
+    <div class="font-bold text-tinta/80 space-y-2 text-sm sm:text-base">
+      <p>Esta es la que elegiste, pero <b>necesito ser claro</b>: yo no puedo generar imágenes, así que
+         las tendrías que producir vos (con Claude en la web, Midjourney, ChatGPT, etc.).</p>
+      <p><b>Lo bueno:</b> el resultado más lindo y 100% a tu medida, con un estilo propio y coherente.</p>
+      <p><b>Lo que cuesta:</b> unas <b>350 imágenes</b> (las palabras de tu banco que se pueden dibujar).
+         A 10 por tanda son ~35 tandas, y hay que recortarlas a fondo transparente y nombrarlas
+         <code class="bg-crema px-1 rounded">perro.png</code>, <code class="bg-crema px-1 rounded">gato.png</code>…</p>
+      <p class="text-lila font-extrabold">💡 Mi propuesta: arrancamos con una de las 3 primeras (los juegos quedan
+         andando ya) y yo dejo el código preparado para que, cuando tengas una imagen propia en
+         <code class="bg-crema px-1 rounded">img/propias/perro.png</code>, la use automáticamente en lugar del emoji.
+         Así podés ir reemplazando de a poco, sin bloquear nada.</p>
+    </div>
+  </div>
+
+  <div class="text-center pb-10">
+    <p class="font-titulo font-extrabold uppercase text-lg">¿Cuál te gusta más? Decime 1, 2, 3 o 4</p>
+    <p class="font-bold text-tinta/50 text-sm mt-1">
+      En la app final el set elegido se descarga a la carpeta <code>img/</code>: no depende de internet.
+    </p>
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   ITEMS: palabra + código unicode + emoji del sistema
+   ================================================================== */
+const ITEMS = [
+  { p:'PERRO',      cod:'1F436', e:'🐶' },
+  { p:'GATO',       cod:'1F431', e:'🐱' },
+  { p:'ELEFANTE',   cod:'1F418', e:'🐘' },
+  { p:'MARIPOSA',   cod:'1F98B', e:'🦋' },
+  { p:'PEZ',        cod:'1F41F', e:'🐟' },
+  { p:'MANZANA',    cod:'1F34E', e:'🍎' },
+  { p:'BANANA',     cod:'1F34C', e:'🍌' },
+  { p:'TORTA',      cod:'1F382', e:'🎂' },
+  { p:'CASA',       cod:'1F3E0', e:'🏠' },
+  { p:'AUTO',       cod:'1F697', e:'🚗' },
+  { p:'PELOTA',     cod:'26BD',  e:'⚽' },
+  { p:'ZAPATILLA',  cod:'1F45F', e:'👟' },
+  { p:'FLOR',       cod:'1F338', e:'🌸' },
+  { p:'ARBOL',      cod:'1F333', e:'🌳' },
+  { p:'LUNA',       cod:'1F319', e:'🌙' },
+  { p:'ESTRELLA',   cod:'2B50',  e:'⭐' }
+];
+
+/* Los dos sets ya están DESCARGADOS en la carpeta img/ (no depende de internet).
+   Así va a funcionar la app final: archivos locales, andan sin conexión. */
+const urlOpenMoji = c => `img/openmoji/${c.toUpperCase()}.svg`;
+const urlTwemoji  = c => `img/twemoji/${c.toLowerCase()}.svg`;
+
+/* ==================================================================
+   SVG DIBUJADOS A MANO (muestra de 8 de los 16)
+   ================================================================== */
+const AMANO = {
+  CASA: `<svg viewBox="0 0 100 100"><rect x="22" y="46" width="56" height="42" rx="4" fill="#FDE68A" stroke="#D97706" stroke-width="4"/>
+    <path d="M14 48 L50 16 L86 48 Z" fill="#F87171" stroke="#B91C1C" stroke-width="4" stroke-linejoin="round"/>
+    <rect x="43" y="64" width="16" height="24" rx="2" fill="#92400E"/>
+    <rect x="28" y="54" width="13" height="13" rx="2" fill="#7DD3FC" stroke="#0EA5E9" stroke-width="3"/>
+    <rect x="61" y="54" width="13" height="13" rx="2" fill="#7DD3FC" stroke="#0EA5E9" stroke-width="3"/></svg>`,
+
+  FLOR: `<svg viewBox="0 0 100 100"><path d="M50 62 L50 92" stroke="#16A34A" stroke-width="6" stroke-linecap="round"/>
+    <path d="M50 78 Q30 72 26 84 Q42 90 50 78" fill="#86EFAC" stroke="#16A34A" stroke-width="3"/>
+    <circle cx="50" cy="26" r="15" fill="#F9A8D4" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="26" cy="44" r="15" fill="#F9A8D4" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="74" cy="44" r="15" fill="#F9A8D4" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="35" cy="66" r="14" fill="#F9A8D4" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="65" cy="66" r="14" fill="#F9A8D4" stroke="#DB2777" stroke-width="3"/>
+    <circle cx="50" cy="48" r="14" fill="#FDE68A" stroke="#D97706" stroke-width="3"/></svg>`,
+
+  PEZ: `<svg viewBox="0 0 100 100"><path d="M78 50 L96 32 L96 68 Z" fill="#FDBA74" stroke="#EA580C" stroke-width="4" stroke-linejoin="round"/>
+    <ellipse cx="46" cy="50" rx="38" ry="26" fill="#7DD3FC" stroke="#0284C7" stroke-width="4"/>
+    <path d="M40 26 Q48 14 58 28" fill="#7DD3FC" stroke="#0284C7" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="24" cy="44" r="6" fill="#fff"/><circle cx="23" cy="44" r="3" fill="#334155"/>
+    <path d="M56 40 Q64 50 56 60" stroke="#0284C7" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+
+  ESTRELLA: `<svg viewBox="0 0 100 100"><path d="M50 8 L62 38 L94 40 L69 60 L78 92 L50 74 L22 92 L31 60 L6 40 L38 38 Z"
+    fill="#FDE68A" stroke="#D97706" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="40" cy="48" r="3.5" fill="#334155"/><circle cx="60" cy="48" r="3.5" fill="#334155"/>
+    <path d="M42 60 Q50 68 58 60" stroke="#334155" stroke-width="4" fill="none" stroke-linecap="round"/></svg>`,
+
+  LUNA: `<svg viewBox="0 0 100 100"><path d="M62 12 A40 40 0 1 0 62 88 A32 32 0 1 1 62 12 Z"
+    fill="#FDE68A" stroke="#D97706" stroke-width="5" stroke-linejoin="round"/>
+    <circle cx="40" cy="34" r="4" fill="#FCD34D"/><circle cx="32" cy="56" r="6" fill="#FCD34D"/>
+    <circle cx="46" cy="70" r="3.5" fill="#FCD34D"/></svg>`,
+
+  MANZANA: `<svg viewBox="0 0 100 100"><path d="M50 26 Q52 14 62 10" stroke="#92400E" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <path d="M56 20 Q74 8 80 22 Q66 32 56 20 Z" fill="#86EFAC" stroke="#16A34A" stroke-width="3"/>
+    <path d="M50 26 C22 26 12 48 18 68 C24 88 40 94 50 88 C60 94 76 88 82 68 C88 48 78 26 50 26 Z"
+      fill="#F87171" stroke="#B91C1C" stroke-width="4"/>
+    <ellipse cx="34" cy="48" rx="7" ry="10" fill="#fff" opacity=".55" transform="rotate(-20 34 48)"/></svg>`,
+
+  PELOTA: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#fff" stroke="#334155" stroke-width="4"/>
+    <path d="M50 30 L64 40 L58 57 L42 57 L36 40 Z" fill="#334155"/>
+    <g stroke="#334155" stroke-width="4" stroke-linecap="round">
+      <line x1="50" y1="30" x2="50" y2="12"/><line x1="64" y1="40" x2="80" y2="30"/>
+      <line x1="58" y1="57" x2="68" y2="76"/><line x1="42" y1="57" x2="32" y2="76"/>
+      <line x1="36" y1="40" x2="20" y2="30"/></g></svg>`,
+
+  ARBOL: `<svg viewBox="0 0 100 100"><rect x="43" y="58" width="14" height="34" rx="4" fill="#92400E"/>
+    <circle cx="50" cy="34" r="22" fill="#86EFAC" stroke="#16A34A" stroke-width="4"/>
+    <circle cx="30" cy="48" r="17" fill="#86EFAC" stroke="#16A34A" stroke-width="4"/>
+    <circle cx="70" cy="48" r="17" fill="#86EFAC" stroke="#16A34A" stroke-width="4"/>
+    <circle cx="40" cy="30" r="4" fill="#F87171"/><circle cx="62" cy="42" r="4" fill="#F87171"/></svg>`
+};
+
+/* ==================================================================
+   RENDER DE LA TABLA
+   ================================================================== */
+let TAM = 80;
+const filas = document.getElementById('filas');
+
+function pintarTabla(){
+  filas.innerHTML = ITEMS.map((it, i) => {
+    const caja = `display:inline-flex;align-items:center;justify-content:center;width:${TAM}px;height:${TAM}px;`;
+    const amano = AMANO[it.p]
+      ? `<div style="${caja}">${AMANO[it.p]}</div>`
+      : `<span class="text-tinta/30 text-xs font-bold uppercase">hay que<br>dibujarlo</span>`;
+    return `<tr class="${i%2 ? 'bg-crema/60' : ''} border-t border-tinta/10">
+      <td class="p-2 text-left uppercase whitespace-nowrap">${it.p}</td>
+      <td class="p-2 celda"><span style="${caja}"><img data-set="openmoji" src="${urlOpenMoji(it.cod)}" alt="${it.p}"></span></td>
+      <td class="p-2 celda"><span style="${caja}"><img data-set="twemoji" src="${urlTwemoji(it.cod)}" alt="${it.p}"></span></td>
+      <td class="p-2"><span style="${caja}font-size:${TAM*0.78}px;line-height:1;">${it.e}</span></td>
+      <td class="p-2">${amano}</td>
+    </tr>`;
+  }).join('');
+
+  // Marcamos en gris las que no cargaron, para no confundir
+  filas.querySelectorAll('img').forEach(img => {
+    img.addEventListener('error', () => {
+      img.classList.add('roto');
+      img.replaceWith(Object.assign(document.createElement('span'), {
+        className:'text-red-400 text-xs font-bold uppercase', textContent:'no cargó' }));
+    });
+  });
+}
+
+/* ==================================================================
+   VISTA PREVIA DENTRO DEL JUEGO
+   ================================================================== */
+function escenaSVG(interior, fondo='#E0F2FE'){
+  return `<svg viewBox="0 0 300 190" class="w-full max-w-[14rem] mx-auto">
+    <rect x="4" y="4" width="292" height="182" rx="26" fill="${fondo}" stroke="#fff" stroke-width="8"/>
+    <circle cx="252" cy="44" r="21" fill="#FDE68A"/>
+    <g stroke="#FDE68A" stroke-width="5" stroke-linecap="round">
+      <line x1="252" y1="12" x2="252" y2="2"/><line x1="282" y1="44" x2="294" y2="44"/><line x1="277" y1="20" x2="285" y2="12"/></g>
+    <g fill="#fff"><circle cx="52" cy="50" r="16"/><circle cx="72" cy="44" r="20"/><circle cx="92" cy="52" r="14"/>
+      <rect x="48" y="50" width="46" height="15" rx="7"/></g>
+    <path d="M4 152 Q75 128 150 146 T296 140 L296 182 Q296 186 292 186 H8 Q4 186 4 182 Z" fill="#86EFAC"/>
+    ${interior}
+  </svg>`;
+}
+
+const ESTILOS = [
+  { n:'1 · OPENMOJI',           color:'border-cielo',    interior: `<image href="${urlOpenMoji('1F436')}" x="106" y="52" width="88" height="88"/>` },
+  { n:'2 · TWEMOJI',            color:'border-amarillo', interior: `<image href="${urlTwemoji('1F436')}" x="106" y="52" width="88" height="88"/>` },
+  { n:'3 · EMOJI DEL SISTEMA',  color:'border-rosa',     interior: `<text x="150" y="128" font-size="78" text-anchor="middle" dominant-baseline="middle">🐶</text>` },
+  { n:'4 · SVG A MANO',         color:'border-verde',    interior: `<g transform="translate(106,52) scale(0.88)">${
+      `<svg viewBox="0 0 100 100" width="100" height="100">
+        <ellipse cx="50" cy="62" rx="30" ry="26" fill="#FDBA74" stroke="#C2410C" stroke-width="4"/>
+        <ellipse cx="22" cy="42" rx="12" ry="18" fill="#EA580C" stroke="#C2410C" stroke-width="4" transform="rotate(-20 22 42)"/>
+        <ellipse cx="78" cy="42" rx="12" ry="18" fill="#EA580C" stroke="#C2410C" stroke-width="4" transform="rotate(20 78 42)"/>
+        <circle cx="39" cy="56" r="4.5" fill="#334155"/><circle cx="61" cy="56" r="4.5" fill="#334155"/>
+        <ellipse cx="50" cy="70" rx="9" ry="7" fill="#334155"/>
+        <path d="M50 77 Q50 84 42 86 M50 77 Q50 84 58 86" stroke="#334155" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      </svg>` }</g>` }
+];
+
+document.getElementById('previews').innerHTML = ESTILOS.map(s => `
+  <div class="bg-crema rounded-3xl p-4 border-4 ${s.color}">
+    <p class="font-titulo font-extrabold uppercase text-center mb-3">${s.n}</p>
+    ${escenaSVG(s.interior)}
+    <div class="flex justify-center gap-2 mt-4">
+      ${['MA','LE','TA'].map(x => `<div class="w-16 h-16 rounded-3xl bg-cielo/25 border-4 border-dashed border-cielo
+        flex items-center justify-center font-titulo font-extrabold text-2xl">${x}</div>`).join('')}
+    </div>
+    <p class="text-center font-titulo font-extrabold uppercase mt-3 text-tinta/50 text-sm">Armá la palabra</p>
+  </div>`).join('');
+
+/* ==================================================================
+   CONTROLES + CHEQUEO DE CARGA
+   ================================================================== */
+const rango = document.getElementById('tam');
+rango.addEventListener('input', () => {
+  TAM = +rango.value;
+  document.getElementById('tamTxt').textContent = TAM + 'px';
+  pintarTabla();
+});
+
+pintarTabla();
+
+setTimeout(() => {
+  const cuenta = set => {
+    const imgs = [...document.querySelectorAll(`img[data-set="${set}"]`)];
+    return imgs.filter(i => i.complete && i.naturalWidth > 0).length + '/' + imgs.length;
+  };
+  document.getElementById('estado').innerHTML = `
+    <b class="uppercase font-titulo">Chequeo de carga:</b>
+    OpenMoji <b>${cuenta('openmoji')}</b> · Twemoji <b>${cuenta('twemoji')}</b> dibujos cargados
+    desde la carpeta <code class="bg-crema px-1 rounded">img/</code> de tu compu.
+    <span class="text-tinta/60">Sin internet: así va a funcionar la app final.
+    Peso real medido: OpenMoji ~5 KB por dibujo, Twemoji ~3,7 KB.</span>`;
+}, 2500);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+Guardá acá las imágenes que generes con IA.
+
+Nombre del archivo: minúscula, sin acentos ni espacios.
+   mate.png   pizarron.png   dulce-de-leche.png
+
+La lista completa con los nombres exactos está en PROMPTS-IMAGENES-IA.md
+
+Cualquier imagen que pongas acá le gana automáticamente al Twemoji
+en TODOS los juegos. No hay que tocar nada de código.

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRUEBA DEL MOTOR · BUSY BOOK</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="tailwind-config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body class="font-cuerpo bg-crema text-tinta p-3 sm:p-6">
+
+<div class="max-w-5xl mx-auto space-y-6">
+
+  <header class="text-center">
+    <h1 class="font-titulo font-extrabold text-2xl sm:text-4xl">🔧 PRUEBA DEL MOTOR</h1>
+    <p class="font-bold text-tinta/60 mt-1">
+      Esta página no es un juego: es para revisar que la base funcione bien
+      antes de construir los 7 bloques.
+    </p>
+  </header>
+
+  <!-- ========== 1 · RESUMEN DEL BANCO ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-3">1 · BANCO DE PALABRAS</h2>
+    <div id="resumen" class="font-bold"></div>
+  </section>
+
+  <!-- ========== 2 · SILABEADOR ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">2 · SILABEADOR AUTOMÁTICO</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      Escribí cualquier palabra para ver cómo la corta. Probá LIBRO, TABLA, ARCOÍRIS, GUARDAPOLVO.
+    </p>
+    <div class="flex flex-wrap gap-3 items-center mb-4">
+      <input id="entrada" placeholder="ESCRIBÍ UNA PALABRA"
+        class="flex-1 min-w-[12rem] rounded-2xl border-4 border-cielo p-3 font-titulo font-extrabold text-xl">
+      <span id="salida" class="font-titulo font-extrabold text-2xl text-verde"></span>
+    </div>
+    <p class="font-titulo font-extrabold text-sm mb-2">MUESTRA DEL BANCO, POR CANTIDAD DE SÍLABAS:</p>
+    <div id="tablaSilabas" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm"></div>
+  </section>
+
+  <!-- ========== 3 · IMÁGENES ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">3 · DIBUJOS</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      Cada palabra busca primero su imagen propia, después el Twemoji, y si no tiene, la reserva
+      de su categoría. Fijate que los NOMBRES salen con nena o nene, las COMIDAS sin dibujo con
+      un plato, y los COLORES con un círculo del color real.
+    </p>
+    <div id="galeria" class="space-y-4"></div>
+  </section>
+
+  <!-- ========== 4 · VOZ Y SONIDOS ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">4 · VOZ Y SONIDOS</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      ⚠️ Tocá primero DESBLOQUEAR: los navegadores no dejan sonar nada hasta que hay un toque.
+      Después abrí AJUSTES y probá las voces. Hacé esto en la compu Y en el celular.
+    </p>
+    <div class="flex flex-wrap gap-3">
+      <button id="bDesbloquear" class="btn3d bg-verde rounded-3xl px-5 py-4 font-titulo font-extrabold">🔓 DESBLOQUEAR AUDIO</button>
+      <button id="bAjustes" class="btn3d bg-cielo rounded-3xl px-5 py-4 font-titulo font-extrabold">⚙️ AJUSTES DE VOZ</button>
+      <button id="bOk" class="btn3d bg-amarillo rounded-3xl px-5 py-4 font-titulo font-extrabold">✅ SONIDO ACIERTO</button>
+      <button id="bErr" class="btn3d bg-rosa rounded-3xl px-5 py-4 font-titulo font-extrabold">❌ SONIDO ERROR</button>
+      <button id="bFan" class="btn3d bg-lila rounded-3xl px-5 py-4 font-titulo font-extrabold">🎉 FANFARRIA</button>
+      <button id="bHablar" class="btn3d bg-white border-2 border-tinta/10 rounded-3xl px-5 py-4 font-titulo font-extrabold">🗣️ HABLAR</button>
+      <button id="bConfeti" class="btn3d bg-naranja rounded-3xl px-5 py-4 font-titulo font-extrabold">🎊 CONFETI</button>
+    </div>
+    <div id="vocesInfo" class="mt-4 bg-crema rounded-2xl p-3 font-bold text-sm"></div>
+  </section>
+
+  <!-- ========== 5 · ARRASTRAR ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">5 · ARRASTRAR CON EL DEDO</h2>
+    <p class="font-bold text-tinta/60 text-sm mb-3">
+      Probá arrastrar las sílabas de MARIPOSA a sus casilleros. <b>Hacelo en el celular</b>:
+      es lo más importante de verificar.
+    </p>
+    <div id="pruebaDrag"></div>
+  </section>
+
+  <!-- ========== 6 · PERFIL ========== -->
+  <section class="bg-white rounded-3xl p-4 sm:p-6 shadow">
+    <h2 class="font-titulo font-extrabold text-xl mb-1">6 · PERFIL Y ESTRELLAS</h2>
+    <div id="perfilBox" class="font-bold"></div>
+  </section>
+
+  <div class="h-10"></div>
+</div>
+
+<script src="banco-palabras.js"></script>
+<script src="motor.js"></script>
+<script>
+/* ===== 1 · RESUMEN DEL BANCO ===== */
+const r = BANCO.resumen();
+document.getElementById('resumen').innerHTML = `
+  <div class="grid grid-cols-3 gap-3 text-center mb-4">
+    ${[['TOTAL', r.total, 'bg-cielo'], ['CON DIBUJO', r.conDibujo, 'bg-verde'], ['SOLO TEXTO', r.sinDibujo, 'bg-amarillo']]
+      .map(([t, n, c]) => `<div class="${c} rounded-2xl p-3">
+        <div class="font-titulo font-extrabold text-3xl">${n}</div>
+        <div class="text-xs">${t}</div></div>`).join('')}
+  </div>
+  <div class="flex flex-wrap gap-2">
+    ${Object.entries(r.porCategoria).sort((a,b) => b[1]-a[1]).map(([k, n]) => {
+      const c = BANCO.CATEGORIAS[k];
+      return `<span class="bg-crema rounded-2xl px-3 py-2 text-sm border-2 border-tinta/10">
+        ${c.emoji} ${c.nombre} <b class="text-verde">${n}</b></span>`;
+    }).join('')}
+  </div>`;
+
+/* ===== 2 · SILABEADOR ===== */
+const entrada = document.getElementById('entrada'), salida = document.getElementById('salida');
+function silabear(){
+  const t = entrada.value.trim();
+  if (!t){ salida.textContent = ''; return; }
+  const s = Silabas.separar(t);
+  const existe = BANCO.buscar(t);
+  salida.innerHTML = s.join('<span class="text-tinta/30">·</span>') +
+    (existe ? ' <span class="text-sm text-cielo">✅ ESTÁ EN EL BANCO</span>'
+            : ' <span class="text-sm text-tinta/40">NO ESTÁ EN EL BANCO</span>');
+}
+entrada.addEventListener('input', silabear);
+entrada.value = 'GUARDAPOLVO';
+silabear();
+
+// Muestra agrupada por cantidad de sílabas
+const porSilabas = { 1:[], 2:[], 3:[], 4:[], 5:[] };
+BANCO.PALABRAS.forEach(p => {
+  const n = Silabas.separar(p.texto).length;
+  if (porSilabas[n] && porSilabas[n].length < 12) porSilabas[n].push(p);
+});
+document.getElementById('tablaSilabas').innerHTML = Object.entries(porSilabas)
+  .filter(([, arr]) => arr.length)
+  .map(([n, arr]) => `
+    <div class="bg-crema rounded-2xl p-3 border-2 border-tinta/10">
+      <p class="font-titulo font-extrabold mb-2">${n} SÍLABA${n > 1 ? 'S' : ''}
+        <span class="text-xs text-tinta/50">(NIVEL ${n <= 2 ? 'FÁCIL' : n === 3 ? 'MEDIO' : 'DIFÍCIL'})</span></p>
+      ${arr.map(p => `<div class="font-mono text-xs py-0.5">${Silabas.separar(p.texto).join('-')}</div>`).join('')}
+    </div>`).join('');
+
+/* ===== 3 · GALERÍA DE DIBUJOS ===== */
+const grupos = [
+  ['NOMBRES: NENAS, VARONES Y AMBIGUOS', ['DELFI','EMMA','ABRIL','THEO','BENJA','CIRO','TITI','MAXI','AGUS']],
+  ['ANIMALES Y DINOS (CON DIBUJO PROPIO)', ['PERRO','JIRAFA','MARIPOSA','TIBURÓN','DINOSAURIO','DRAGÓN','HADA','CARACOL']],
+  ['SIN DIBUJO → USAN LA RESERVA DE SU CATEGORÍA', ['PURÉ','TARTA','PICAPORTE','PERCHERO','FIBRÓN','BERMUDA','OMBLIGO','ÁSPERO','SOPLAR','LUNES','TRICERATOPS']],
+  ['COLORES → CÍRCULO DEL COLOR REAL', ['ROJO','AZUL','VERDE','AMARILLO','ROSA','CELESTE','BLANCO','NEGRO','VIOLETA','TURQUESA','FUCSIA','DORADO','GRIS','MARRÓN']]
+];
+document.getElementById('galeria').innerHTML = grupos.map(([tit, palabras]) => `
+  <div>
+    <p class="font-titulo font-extrabold text-sm mb-2 text-tinta/70">${tit}</p>
+    <div class="flex flex-wrap gap-3">
+      ${palabras.map(w => {
+        const p = BANCO.buscar(w);
+        if (!p) return `<div class="text-red-500 text-xs">FALTA: ${w}</div>`;
+        return `<div class="bg-crema rounded-2xl p-2 text-center border-2 border-tinta/10 w-24">
+          <div class="h-14 flex items-center justify-center">${Img.html(p, 'w-12 h-12')}</div>
+          <div class="text-[10px] font-bold mt-1 leading-tight">${p.texto}</div>
+          <div class="text-[9px] text-tinta/40">${p.twemoji ? 'PROPIO' : 'RESERVA'}</div>
+        </div>`;
+      }).join('')}
+    </div>
+  </div>`).join('');
+
+/* ===== 4 · VOZ Y SONIDOS ===== */
+function infoVoces(){
+  const es = Voz.disponibles('es'), en = Voz.disponibles('en');
+  const el = Voz.elegida('es'), eln = Voz.elegida('en');
+  document.getElementById('vocesInfo').innerHTML = `
+    VOCES EN ESPAÑOL EN ESTE APARATO: <b class="${es.length?'text-verde':'text-red-500'}">${es.length}</b>
+    ${es.length ? '→ USANDO <b>' + el.name + ' (' + el.lang + ')</b>' : '→ NO VA A LEER EN VOZ ALTA'}
+    <br>VOCES EN INGLÉS: <b class="${en.length?'text-verde':'text-red-500'}">${en.length}</b>
+    ${en.length ? '→ USANDO <b>' + eln.name + ' (' + eln.lang + ')</b>' : ''}
+    <br><span class="text-tinta/50">TODAS LAS DISPONIBLES: ${[...es, ...en].map(v => v.name).join(' · ') || 'NINGUNA'}</span>`;
+}
+infoVoces();
+if ('speechSynthesis' in window) speechSynthesis.addEventListener('voiceschanged', infoVoces);
+
+document.getElementById('bDesbloquear').addEventListener('click', () => {
+  Sonido.desbloquear(); Voz.precalentar();
+  setTimeout(infoVoces, 400);
+  Sonido.ok();
+});
+document.getElementById('bAjustes').addEventListener('click', () => UI.panelAjustes());
+document.getElementById('bOk').addEventListener('click', () => Sonido.ok());
+document.getElementById('bErr').addEventListener('click', () => Sonido.error());
+document.getElementById('bFan').addEventListener('click', () => Sonido.fanfarria());
+document.getElementById('bHablar').addEventListener('click', () => Voz.hablar('hola, vamos a jugar con las palabras'));
+document.getElementById('bConfeti').addEventListener('click', () => Confeti(120));
+
+/* ===== 5 · ARRASTRAR ===== */
+const pal = BANCO.buscar('MARIPOSA');
+const sil = Silabas.separar(pal.texto);
+document.getElementById('pruebaDrag').innerHTML = `
+  <div class="text-center">
+    ${UI.escena(Img.html(pal, 'w-20 h-20'))}
+    <div id="zonas" class="flex flex-wrap justify-center gap-2 my-4">
+      ${sil.map((_, i) => `<div class="zt w-20 h-20 rounded-3xl bg-cielo/25 border-4 border-dashed border-cielo
+        flex items-center justify-center font-titulo font-extrabold text-2xl transition-transform" data-idx="${i}"></div>`).join('')}
+    </div>
+    <div class="flex flex-wrap justify-center gap-2">
+      ${mezclar([...sil, 'LE', 'TU']).map(s => `<div class="ft btn3d bg-amarillo rounded-3xl px-4 py-3 min-w-[4.5rem]
+        text-center font-titulo font-extrabold text-2xl" data-val="${s}">${s}</div>`).join('')}
+    </div>
+    <p id="estadoDrag" class="mt-3 font-titulo font-extrabold text-verde"></p>
+  </div>`;
+
+let listas = 0;
+document.querySelectorAll('.zt').forEach(z => Drag.zona(z));
+document.querySelectorAll('.ft').forEach(f => Drag.ficha(f));
+Drag.alSoltar((z, f) => {
+  if (!z.matches('.zt') || z.dataset.ok) return;
+  if (f.dataset.val === sil[+z.dataset.idx]){
+    z.textContent = f.dataset.val; z.dataset.ok = 1;
+    z.classList.remove('bg-cielo/25','border-dashed');
+    z.classList.add('bg-verde','border-solid','pop');
+    f.classList.add('invisible','pointer-events-none');
+    Sonido.ok(); Voz.hablar(f.dataset.val);
+    if (++listas === sil.length){
+      document.getElementById('estadoDrag').textContent = '¡ANDA PERFECTO! ✅';
+      UI.festejar(pal.texto);
+    }
+  } else UI.error(z);
+});
+
+/* ===== 6 · PERFIL ===== */
+function pintarPerfil(){
+  const quien = Perfil.actual();
+  const nombres = BANCO.nombres();
+  document.getElementById('perfilBox').innerHTML = `
+    <p class="mb-3">JUGANDO AHORA:
+      <b class="text-xl">${quien ? Perfil.emojiDe(quien) + ' ' + quien : '🧒 INVITADO'}</b>
+      · TOTAL <b class="text-verde">⭐ ${Puntaje.total()}</b></p>
+    <p class="font-titulo font-extrabold text-sm mb-2">ELEGÍ UN CHICO (HAY ${nombres.length} NOMBRES):</p>
+    <div class="flex flex-wrap gap-2 max-h-40 overflow-y-auto p-1">
+      ${nombres.slice(0, 30).map(n => `<button data-n="${n.texto}"
+        class="btn3d bg-cielo rounded-2xl px-3 py-2 font-titulo font-bold text-sm">
+        ${Perfil.emojiDe(n.texto)} ${n.texto}</button>`).join('')}
+      <span class="self-center text-xs text-tinta/40">…Y ${nombres.length - 30} MÁS</span>
+    </div>
+    <button id="bSumar" class="btn3d bg-verde rounded-2xl px-4 py-3 mt-3 font-titulo font-extrabold">
+      ⭐ SUMAR UNA ESTRELLA A LECTOESCRITURA
+    </button>
+    <div class="mt-3 flex flex-wrap gap-2">
+      ${AREAS.map(a => `<span class="bg-crema rounded-2xl px-3 py-2 text-sm border-2 border-tinta/10">
+        ${a.emoji} ${Puntaje.leer(a.id)}</span>`).join('')}
+    </div>`;
+
+  document.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => {
+    Perfil.poner(b.dataset.n);
+    Voz.hablar('hola ' + b.dataset.n);
+    pintarPerfil();
+  }));
+  document.getElementById('bSumar').addEventListener('click', () => {
+    Puntaje.empezar('lectoescritura');
+    Puntaje.sumar(1);
+    Sonido.ok();
+    pintarPerfil();
+  });
+}
+pintarPerfil();
+</script>
+</body>
+</html>
