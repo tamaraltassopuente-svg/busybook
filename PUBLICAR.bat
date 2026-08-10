@@ -22,17 +22,20 @@ git remote get-url origin >nul 2>&1
 if errorlevel 1 (
   echo  [!] Todavia no esta conectada a GitHub.
   echo.
-  echo      Falta hacer esto UNA sola vez:
+  echo      NO hace falta descargar ningun programa.
+  echo      Falta hacer esto UNA sola vez, desde el navegador:
   echo.
-  echo      1. Entra a github.com y crea tu cuenta
-  echo      2. Boton + arriba a la derecha, New repository
-  echo      3. Nombre: busybook   -   dejalo en Public
-  echo      4. Instala GitHub Desktop: desktop.github.com
-  echo      5. Abri GitHub Desktop, inicia sesion, y hace
-  echo         File - Add local repository - elegi esta carpeta
-  echo      6. Boton Publish repository
+  echo      1. En github.com: boton + arriba a la derecha
+  echo      2. New repository  -  nombre: busybook  -  Public
+  echo      3. Boton Create repository
+  echo      4. Copia la direccion que te queda, algo tipo
+  echo         https://github.com/TU-USUARIO/busybook.git
+  echo      5. Pegasela a Claude y el conecta la carpeta
   echo.
-  echo      Desde ahi en adelante, este archivo hace todo solo.
+  echo      Cuando se conecte, se va a abrir una ventanita del
+  echo      navegador pidiendo autorizar. Toca Authorize y listo.
+  echo      Tu contrasena no se la das a nadie: la guarda Windows.
+  echo.
   echo      El paso a paso completo esta en COMO-PUBLICAR.md
   echo.
   pause

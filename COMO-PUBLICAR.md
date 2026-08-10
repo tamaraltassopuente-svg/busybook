@@ -25,16 +25,20 @@ No tiene que descargar nada, ni descomprimir, ni instalar.
 
 ---
 
-## OPCIÓN A · GitHub Pages (gratis y para siempre)
+## OPCIÓN A · GitHub Pages (gratis, para siempre, SIN DESCARGAR NADA)
 
-### Paso 1 · Crear la cuenta
+> ✅ **No hace falta instalar ningún programa.** Git ya está en tu compu y trae
+> un gestor de credenciales: cuando haga falta, se abre una ventanita del navegador,
+> tocás **Authorize**, y Windows guarda el permiso. Tu contraseña no se la das a nadie.
+
+### Paso 1 · Crear la cuenta *(solo vos podés hacerlo: es tu identidad)*
 1. Entrá a **github.com** → botón **Sign up**
 2. Poné tu mail, una contraseña y elegí un nombre de usuario.
    ⚠️ **El nombre de usuario va a ser parte del link.** Si elegís `tamara`, el link será
    `https://tamara.github.io/...`. Elegí algo corto y fácil de dictar por teléfono.
 3. Confirmá el mail que te llega.
 
-### Paso 2 · Crear el repositorio (la "carpeta en la nube")
+### Paso 2 · Crear el repositorio (la "carpeta en la nube") — 4 clics
 1. Arriba a la derecha, el **`+`** → **New repository**
 2. **Repository name:** `busybook`
 3. Dejá marcado **Public**
@@ -42,17 +46,19 @@ No tiene que descargar nada, ni descomprimir, ni instalar.
 4. **No** marques "Add a README file"
 5. Botón verde **Create repository**
 
-### Paso 3 · Subir la carpeta
-1. En la pantalla que aparece, buscá el link **"uploading an existing file"**
-   *(o andá a la pestaña **Add file** → **Upload files**)*
-2. Abrí el explorador de Windows en `Documents\Claude\Projects\TAM`
-3. **Seleccioná todo lo que está adentro** (Ctrl+A) y **arrastralo** al recuadro del navegador
-   ⚠️ Arrastrá **el contenido**, no la carpeta TAM. Los archivos tienen que quedar en la raíz.
-   ✅ La carpeta `img/` sí se arrastra completa: GitHub mantiene las subcarpetas.
-4. Esperá que suba (la barra de progreso llega al final)
-5. Abajo, botón verde **Commit changes**
+### Paso 3 · Conectar y subir — esto lo hace Claude
+1. En la pantalla que aparece, GitHub te muestra una dirección tipo
+   `https://github.com/TU-USUARIO/busybook.git`
+2. **Copiala y pegásela a Claude.**
+3. Claude conecta la carpeta y sube los 363 archivos.
+4. Cuando lo haga, **se va a abrir una ventanita del navegador pidiendo autorizar**.
+   Tocá **Authorize** (ya estás con la sesión abierta, así que es un clic).
+   Windows guarda el permiso y no vuelve a pedirlo.
 
-### Paso 4 · Encender GitHub Pages
+> 💡 **¿Por qué así y no arrastrando archivos?** El subidor web de GitHub acepta
+> 100 archivos por vez, y son 363. Habría que hacerlo en 4 tandas. Por acá va de una.
+
+### Paso 4 · Encender GitHub Pages — 3 clics
 1. Pestaña **Settings** (arriba, a la derecha, el engranaje)
 2. Menú de la izquierda: **Pages**
 3. En **Source**, elegí **Deploy from a branch**
@@ -71,9 +77,11 @@ En el celular, abrí el link y:
 Queda un ícono en el escritorio del teléfono. El chico lo toca y entra directo, sin ver el navegador.
 
 ### Para actualizar algo más adelante
-**Add file** → **Upload files** → arrastrás el archivo corregido → **Commit changes**.
-GitHub reemplaza el viejo y en 1 minuto el link ya muestra la versión nueva.
-*(A veces el celular guarda la versión vieja en caché: recargá con la pantalla hacia abajo.)*
+**Doble clic en `PUBLICAR.bat`.** Nada más: detecta lo que cambió, lo sube, y te avisa.
+En 1 o 2 minutos el link ya muestra la versión nueva.
+*(A veces el celular guarda la versión vieja en caché: recargá tirando la pantalla hacia abajo.)*
+
+Y si estás charlando con Claude, alcanza con pedirle "subí los cambios".
 
 ---
 
