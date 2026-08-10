@@ -572,8 +572,19 @@ const UI = (() => {
     });
   }
 
+  /* Festejo pendiente. Hay que poder cancelarlo: si el chico gana y toca
+     MENÚ antes de que termine el cartel, el "pasar al siguiente" volvería
+     a dibujar el juego encima del menú. */
+  let festejoTimer = null, festejoCartel = null;
+
+  function cancelarFestejo(){
+    if (festejoTimer){ clearTimeout(festejoTimer); festejoTimer = null; }
+    if (festejoCartel){ festejoCartel.remove(); festejoCartel = null; }
+  }
+
   /** Cartel de festejo + confeti + fanfarria */
   function festejar(texto, alTerminar, espera = 2000){
+    cancelarFestejo();                       // nunca dos festejos encimados
     Confeti(120);
     Sonido.fanfarria();
     const c = document.createElement('div');
@@ -585,7 +596,12 @@ const UI = (() => {
         <div class="font-titulo font-bold text-tinta/60">¡MUY BIEN!</div>
       </div>`;
     document.body.appendChild(c);
-    setTimeout(() => { c.remove(); if (alTerminar) alTerminar(); }, espera);
+    festejoCartel = c;
+    festejoTimer = setTimeout(() => {
+      festejoTimer = null; festejoCartel = null;
+      c.remove();
+      if (alTerminar) alTerminar();
+    }, espera);
   }
 
   /** Sacudida + sonido de error, sin bloquear al chico */
@@ -737,7 +753,7 @@ const UI = (() => {
     </div>`;
   }
 
-  return { consola, marcador, portada, festejar, error, modal, panelAjustes,
+  return { consola, marcador, portada, festejar, cancelarFestejo, error, modal, panelAjustes,
            barra, conectarBarra, consigna, escena };
 })();
 

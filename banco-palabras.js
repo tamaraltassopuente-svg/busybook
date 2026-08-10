@@ -51,18 +51,22 @@ const CRUDO = {
 
 /* ---------- 🧒 NOMBRES PROPIOS (99) ----------------------------- */
 /*  :f nena · :m varón · :x ambiguo (revisar)                       */
+/*  Géneros revisados con Tamara. Los apodos van con el género del nombre
+    completo: TITI es Thiago, BRUNI y BRU son Bruno, VICO es Ludovico.
+    AGUS queda neutro a propósito: puede ser Agustín o Agustina.          */
 nombres: `
-TITI:x THIAGO:m FELI:m FELIPE:m LOLO:m LORENZO:m DELFI:f DELFINA:f CIRO:m
+TITI:m THIAGO:m FELI:m FELIPE:m LOLO:m LORENZO:m DELFI:f DELFINA:f CIRO:m
 REGI:f REGINA:f NAHUE:m NAHUEL:m EMMA:f SANTI:m SANTIAGO:m BENJA:m BENJAMÍN:m
 THEO:m MATTEO:m MATHEO:m LUCA:m RENU:f RENATA:f LUNA:f BAUTI:m BAUTISTA:m
-AGUSTINA:f ANTONELLA:f BRUNO:m BRUNI:x BRU:x CLARI:f CLARITA:f CLARA:f MEGAN:f
-YAIR:m ADRIANO:m JOAQUÍN:m VIERA:x CAMILO:m ROMEO:m NICOLÁS:m LEÓN:m AZUL:f
-GIO:m GIOVANNI:m ABRIL:f ABI:f FAUSTI:m FAUSTINO:m EMI:x EMILIA:f CONSTANTINO:m
-VICO:x LUDOVICO:m WENCHI:x POLITO:m HIPÓLITO:m SIMÓN:m CALI:x JACINTO:m JACIN:m
-ISA:f ISABELA:f EVA:f VITO:m AGUS:x ALMA:f ORNE:x SOL:f EUGENIA:f TAMARA:f
+AGUSTINA:f ANTONELLA:f BRUNO:m BRUNI:m BRU:m CLARI:f CLARITA:f CLARA:f MEGAN:f
+YAIR:m ADRIANO:m JOAQUÍN:m VIERA:f CAMILO:m ROMEO:m NICOLÁS:m LEÓN:m AZUL:f
+GIO:m GIOVANNI:m ABRIL:f ABI:f FAUSTI:m FAUSTINO:m EMI:f EMILIA:f CONSTANTINO:m
+VICO:m LUDOVICO:m WENCHI:m POLITO:m HIPÓLITO:m SIMÓN:m CALI:m JACINTO:m JACIN:m
+ISA:f ISABELA:f EVA:f VITO:m AGUS:x ALMA:f ORNE:f SOL:f EUGENIA:f TAMARA:f
 LEILA:f CRISTIAN:m GUSTAVO:m SOFÍA:f AQUILES:m ENEAS:m LOLA:f WALTER:m NORMA:f
 MATÍAS:m MARTÍN:m DAFNE:f MAGALÍ:f EVELYN:f DÁNAE:f IAN:m GABRIEL:m FRANCISCO:m
-MARCOS:m MAXI:x CAROLINA:f LAUREANO:m ESTEFI:f BELÉN:f LAILA:f MARILINA:f
+MARCOS:m MAXI:m CAROLINA:f LAUREANO:m ESTEFI:f BELÉN:f LAILA:f MARILINA:f
+VERA:f BRUNELA:f QUIMEI:f KIMEI:f AGUSTÍN:m ORNELLA:f MAXIMILIANO:m
 `,
 
 /* ---------- 📅 DÍAS Y MESES (19) -------------------------------- */
@@ -126,6 +130,7 @@ CANGREJO:1f980 CANGREJOS:1f980
 dinos: `
 DINO:1f996 DINOSAURIO:1f996 DINOSAURIOS:1f996
 TRICERATOPS BRONTOSAURIO VELOCIRAPTOR PTERODÁCTILO ESTEGOSAURIO
+DIPLODOCUS T-REX
 MONSTRUO:1f479 MONSTRUOS:1f479 DRAGÓN:1f409 DRAGONES:1f409
 HADA:1f9da HADAS:1f9da MAGO:1f9d9 MAGOS:1f9d9 MAGIA:2728
 BRUJA:1f9d9 BRUJAS:1f9d9 CASTILLO:1f3f0 CASTILLOS:1f3f0
@@ -154,7 +159,7 @@ TARTA BUDÍN MEDIALUNA MEDIALUNAS CHURRO:1f9c7 CHURROS:1f9c7 CHIPÁ
 SÁNDWICH:1f96a SÁNDWICHES:1f96a POCHOCLO:1f37f POCHOCLOS:1f37f
 GELATINA GELATINAS DONAS:1f369 CACAO:2615 MERMELADA:1f36f
 ANANÁ:1f34d KIWI:1f95d COCO:1f965 PALTA:1f951
-FACTURAS BIZCOCHITOS
+FACTURAS BIZCOCHITOS DULCE_DE_LECHE
 `,
 
 /* ---------- 🌸 NATURALEZA, FLORES Y ÁRBOLES --------------------- */
@@ -233,7 +238,7 @@ PARAGUAS:2602 ANTEOJOS:1f453 JOGGING
 
 /* ---------- 🚗 TRANSPORTES, CALLES Y CIUDAD --------------------- */
 transporte: `
-AUTO:1f697 AUTOS:1f697 COCHE:1f697 COCHECITO COCHECITOS
+AUTO:1f697 AUTOS:1f697 COCHE:1f697 COCHECITO COCHECITOS TAXI:1f696
 COLECTIVO:1f68c COLECTIVOS:1f68c BONDI:1f68c BONDIS:1f68c
 TREN:1f686 TRENES:1f686 SUBTE:1f687
 BICI:1f6b2 BICIS:1f6b2 BICICLETA:1f6b2 BICICLETAS:1f6b2
@@ -325,7 +330,9 @@ for (const [cat, crudo] of Object.entries(CRUDO)){
   for (const token of crudo.trim().split(/\s+/)){
     if (!token) continue;
     const i = token.lastIndexOf(':');
-    const texto  = (i > 0 ? token.slice(0, i) : token).toUpperCase();
+    // El guion bajo es un espacio: DULCE_DE_LECHE → "DULCE DE LECHE".
+    // Hace falta porque separamos los tokens por espacios.
+    const texto  = (i > 0 ? token.slice(0, i) : token).toUpperCase().replace(/_/g, ' ');
     const codigo =  i > 0 ? token.slice(i + 1) : null;
 
     const esNombre = (cat === 'nombres');

@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#7DD3FC">
+<title>BUSY BOOK DIGITAL</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="tailwind-config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body class="font-cuerpo bg-crema text-tinta min-h-screen py-3 px-2 sm:py-6"></body>
+
+<script src="banco-palabras.js"></script>
+<script src="motor.js"></script>
+<script>
+/* ==================================================================
+   BUSY BOOK DIGITAL · VERSIÓN DE PRUEBA
+   14 juegos: 2 de cada uno de los 7 bloques.
+   Toda la maquinaria pesada vive en motor.js y banco-palabras.js.
+   ================================================================== */
+
+let vista;   // el <main> donde se dibuja todo
+
+/* ---------- CATÁLOGO: 2 juegos por bloque ---------- */
+const JUEGOS = {
+  lectoescritura: [
+    { id:'silabas',  nombre:'ARMÁ LA PALABRA', emoji:'🧩', desc:'ARRASTRÁ LAS SÍLABAS' },
+    { id:'crear',    nombre:'CREÁ PALABRAS',   emoji:'⌨️', desc:'ESCRIBÍ CON SÍLABAS' } ],
+  logica: [
+    { id:'puzzle',   nombre:'ROMPECABEZAS',    emoji:'🧩', desc:'ARMÁ EL DIBUJO' },
+    { id:'memo',     nombre:'MEMORIA',         emoji:'🃏', desc:'PALABRA CON DIBUJO' } ],
+  ingles: [
+    { id:'listen',   nombre:'LISTEN & CHOOSE', emoji:'👂', desc:'ESCUCHÁ Y TOCÁ' },
+    { id:'match',   nombre:'MATCH THE WORD',  emoji:'🔗', desc:'UNÍ CON EL DIBUJO' } ],
+  matematica: [
+    { id:'contar',   nombre:'¿CUÁNTOS HAY?',   emoji:'🔢', desc:'CONTÁ Y ARRASTRÁ' },
+    { id:'sumar',    nombre:'SUMAS',           emoji:'➕', desc:'SUMÁ CON DIBUJOS' } ],
+  ciencias: [
+    { id:'habitat',  nombre:'A SU HOGAR',      emoji:'🏞️', desc:'DÓNDE VIVE CADA UNO' },
+    { id:'vf',       nombre:'SÍ O NO',         emoji:'✅', desc:'¿ES VERDAD?' } ],
+  colores: [
+    { id:'color',    nombre:'TOCÁ EL COLOR',   emoji:'🌈', desc:'ESCUCHÁ Y TOCÁ' },
+    { id:'formas',   nombre:'LAS FORMAS',      emoji:'⭐', desc:'CADA UNA EN SU HUECO' } ],
+  caligrafia: [
+    { id:'letras',   nombre:'LAS LETRAS',      emoji:'🔤', desc:'TRAZÁ DE LA A A LA Z' },
+    { id:'numeros',  nombre:'LOS NÚMEROS',     emoji:'✏️', desc:'TRAZÁ DEL 0 AL 9' } ]
+};
+
+/* ==================================================================
+   DATOS PROPIOS DE ESTA VERSIÓN DE PRUEBA
+   ================================================================== */
+const ESCENAS = [
+  { archivo:'escena-plaza.png',  nombre:'LA PLAZA' },
+  { archivo:'escena-granja.png', nombre:'LA GRANJA' },
+  { archivo:'escena-selva.png',  nombre:'LA SELVA' },
+  { archivo:'escena-mar.png',    nombre:'EL MAR' },
+  { archivo:'escena-cuarto.png', nombre:'MI CUARTO' }
+];
+
+const INGLES = [
+  { en:'DOG',   es:'PERRO' },   { en:'CAT',    es:'GATO' },
+  { en:'HOUSE', es:'CASA' },    { en:'APPLE',  es:'MANZANA' },
+  { en:'SUN',   es:'SOL' },     { en:'MOON',   es:'LUNA' },
+  { en:'FISH',  es:'PEZ' },     { en:'FLOWER', es:'FLOR' },
+  { en:'MILK',  es:'LECHE' },   { en:'CAR',    es:'AUTO' },
+  { en:'BOOK',  es:'LIBRO' },   { en:'STAR',   es:'ESTRELLA' }
+];
+
+const HABITATS = [
+  { id:'selva',  nombre:'LA SELVA',  emoji:'🌴', animales:['MONO','LEÓN','TIGRE','JIRAFA','ELEFANTE','CEBRA'] },
+  { id:'mar',    nombre:'EL MAR',    emoji:'🌊', animales:['PEZ','TIBURÓN','BALLENA','DELFÍN','TORTUGA','CANGREJO'] },
+  { id:'granja', nombre:'LA GRANJA', emoji:'🚜', animales:['VACA','OVEJA','CHANCHO','GALLINA','CABALLO','PATO'] }
+];
+
+const VERDADEROFALSO = [
+  { texto:'EL PEZ VIVE EN EL AGUA',        palabra:'PEZ',      ok:true },
+  { texto:'LA VACA HACE MIAU',             palabra:'VACA',     ok:false },
+  { texto:'EL SOL SALE DE DÍA',            palabra:'SOL',      ok:true },
+  { texto:'LA MARIPOSA TIENE ALAS',        palabra:'MARIPOSA', ok:true },
+  { texto:'EL ELEFANTE ES CHIQUITO',       palabra:'ELEFANTE', ok:false },
+  { texto:'LA FLOR CRECE EN LA TIERRA',    palabra:'FLOR',     ok:true },
+  { texto:'EL PERRO VUELA',                palabra:'PERRO',    ok:false },
+  { texto:'LA LUNA SE VE DE NOCHE',        palabra:'LUNA',     ok:true },
+  { texto:'EL CARACOL LLEVA SU CASA',      palabra:'CARACOL',  ok:true },
+  { texto:'EL DINOSAURIO VIVE EN MI PIEZA',palabra:'DINOSAURIO',ok:false }
+];
+
+const COLORES_JUEGO = ['ROJO','AZUL','VERDE','AMARILLO','ROSA','CELESTE','NARANJA','VIOLETA','MARRÓN','NEGRO'];
+
+const FORMAS = [
+  { id:'circulo',   nombre:'CÍRCULO',   svg:'<circle cx="50" cy="50" r="42"/>' },
+  { id:'cuadrado',  nombre:'CUADRADO',  svg:'<rect x="10" y="10" width="80" height="80" rx="6"/>' },
+  { id:'triangulo', nombre:'TRIÁNGULO', svg:'<path d="M50 8 L92 88 L8 88 Z"/>' },
+  { id:'estrella',  nombre:'ESTRELLA',  svg:'<path d="M50 6 L61 38 L95 38 L67 58 L78 90 L50 70 L22 90 L33 58 L5 38 L39 38 Z"/>' },
+  { id:'rombo',     nombre:'ROMBO',     svg:'<path d="M50 6 L92 50 L50 94 L8 50 Z"/>' }
+];
+
+/* Trazos: cada letra o número es una lista de tramos [desde, hasta] en 220x220 */
+const TRAZOS = {
+  A:[[[40,180],[110,35]],[[110,35],[180,180]],[[70,125],[150,125]]],
+  B:[[[55,30],[55,190]],[[55,30],[135,55]],[[135,55],[55,105]],[[55,105],[145,140]],[[145,140],[55,190]]],
+  C:[[[165,60],[100,32]],[[100,32],[45,110]],[[45,110],[100,188]],[[100,188],[165,160]]],
+  D:[[[55,30],[55,190]],[[55,30],[160,110]],[[160,110],[55,190]]],
+  E:[[[160,35],[55,35]],[[55,35],[55,110]],[[55,110],[140,110]],[[55,110],[55,185]],[[55,185],[160,185]]],
+  L:[[[60,30],[60,185]],[[60,185],[165,185]]],
+  M:[[[45,190],[45,35]],[[45,35],[110,120]],[[110,120],[175,35]],[[175,35],[175,190]]],
+  O:[[[110,30],[40,110]],[[40,110],[110,190]],[[110,190],[180,110]],[[180,110],[110,30]]],
+  P:[[[55,190],[55,32]],[[55,32],[150,75]],[[150,75],[55,118]]],
+  S:[[[165,55],[85,32]],[[85,32],[55,85]],[[55,85],[165,135]],[[165,135],[135,188]],[[135,188],[50,165]]],
+  T:[[[35,35],[185,35]],[[110,35],[110,190]]],
+  0:[[[110,30],[45,110]],[[45,110],[110,190]],[[110,190],[175,110]],[[175,110],[110,30]]],
+  1:[[[70,60],[110,30]],[[110,30],[110,190]]],
+  2:[[[50,60],[110,30]],[[110,30],[160,80]],[[160,80],[50,190]],[[50,190],[170,190]]],
+  3:[[[50,45],[130,35]],[[130,35],[105,105]],[[105,105],[145,150]],[[145,150],[50,185]]],
+  4:[[[130,30],[45,135]],[[45,135],[175,135]],[[130,30],[130,190]]],
+  5:[[[165,35],[65,35]],[[65,35],[60,105]],[[60,105],[150,130]],[[150,130],[60,188]]],
+  6:[[[150,40],[70,110]],[[70,110],[65,175]],[[65,175],[150,160]],[[150,160],[70,110]]],
+  7:[[[40,35],[175,35]],[[175,35],[85,190]]],
+  8:[[[110,30],[60,75]],[[60,75],[110,110]],[[110,110],[160,75]],[[160,75],[110,30]],
+     [[110,110],[55,155]],[[55,155],[110,192]],[[110,192],[165,155]],[[165,155],[110,110]]],
+  9:[[[150,110],[70,60]],[[70,60],[150,45]],[[150,45],[145,190]]]
+};
+const LETRAS_DEMO  = ['A','B','C','D','E','L','M','O','P','S','T'];
+const NUMEROS_DEMO = ['0','1','2','3','4','5','6','7','8','9'];
+
+
+/* ==================================================================
+   HELPERS
+   ================================================================== */
+/** Palabras con dibujo y de largo razonable, listas para jugar */
+function palabrasJugables({ cat = null, minSil = 0, maxSil = 9, conDibujo = true } = {}){
+  return BANCO.filtrar({ cat, conDibujo: conDibujo ? null : null })
+    .filter(p => (conDibujo ? (p.twemoji || true) : true))
+    .filter(p => !p.esColor && p.cat !== 'nombres' && !p.texto.includes(' '))
+    .filter(p => { const n = Silabas.separar(p.texto).length; return n >= minSil && n <= maxSil; });
+}
+
+/** Ficha con el dibujo de una palabra */
+const dibujo = (p, c = 'w-16 h-16') => Img.html(p, c);
+
+/* ==================================================================
+   PANTALLA 1 · ELEGIR QUIÉN JUEGA
+   ================================================================== */
+function pantallaPerfil(){
+  const nombres = BANCO.nombres();
+  const d = document.createElement('div');
+  d.id = 'bb-perfil-pantalla';
+  d.className = 'fixed inset-0 z-[9999] bg-gradient-to-b from-cielo via-crema to-rosa overflow-y-auto p-4 no-sel';
+  d.innerHTML = `
+    <div class="max-w-3xl mx-auto text-center py-4">
+      <div class="text-6xl sm:text-7xl flota">🎒</div>
+      <h1 class="font-titulo font-extrabold text-3xl sm:text-5xl mt-2">BUSY BOOK</h1>
+      <p class="font-titulo font-bold text-lg sm:text-2xl text-tinta/70 mb-4">¿QUIÉN VA A JUGAR?</p>
+
+      <input id="bb-buscar" placeholder="BUSCÁ TU NOMBRE"
+        class="w-full max-w-sm rounded-3xl border-4 border-white p-4 font-titulo font-extrabold text-xl text-center shadow">
+
+      <div id="bb-nombres" class="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-4"></div>
+
+      <button id="bb-invitado" class="btn3d bg-white rounded-3xl px-8 py-4 mt-5 font-titulo font-extrabold text-lg">
+        🧒 JUGAR SIN NOMBRE
+      </button>
+    </div>`;
+  document.body.appendChild(d);
+
+  const cont = d.querySelector('#bb-nombres');
+  function pintar(filtro = ''){
+    const f = BANCO.sinAcento(filtro.toUpperCase());
+    const lista = nombres.filter(n => !f || n.plano.includes(f)).slice(0, 40);
+    cont.innerHTML = lista.length
+      ? lista.map(n => `<button data-n="${n.texto}"
+          class="btn3d bg-white rounded-2xl px-2 py-3 font-titulo font-extrabold text-sm sm:text-base">
+          <span class="text-2xl block">${Perfil.emojiDe(n.texto)}</span>${n.texto}</button>`).join('')
+      : `<p class="col-span-full font-titulo font-bold text-tinta/50 py-4">
+           NO ESTÁ ESE NOMBRE. TOCÁ "JUGAR SIN NOMBRE".</p>`;
+    cont.querySelectorAll('[data-n]').forEach(b => b.addEventListener('click', () => entrar(b.dataset.n)));
+  }
+  pintar();
+  d.querySelector('#bb-buscar').addEventListener('input', e => pintar(e.target.value));
+  d.querySelector('#bb-invitado').addEventListener('click', () => entrar(null));
+
+  function entrar(nombre){
+    Sonido.desbloquear(); Voz.precalentar();
+    if (nombre) Perfil.poner(nombre); else Perfil.salir();
+    d.remove();
+    arrancar();
+    setTimeout(() => Voz.hablar(nombre ? 'hola ' + nombre + ', vamos a jugar' : 'vamos a jugar'), 300);
+  }
+}
+
+/* ==================================================================
+   PANTALLA 2 · PANEL DE INICIO
+   ================================================================== */
+function panelInicio(){
+  UI.cancelarFestejo();          // si venía un festejo, que no pise el panel
+  Puntaje.empezar(null);
+  const quien = Perfil.actual();
+  const total = Puntaje.total();
+  UI.marcador(total);
+
+  vista.innerHTML = `
+    <div class="text-center no-sel">
+      <div class="bg-gradient-to-r from-cielo/40 via-amarillo/40 to-rosa/40 rounded-3xl px-4 py-4 mb-5">
+        <h2 class="font-titulo font-extrabold text-2xl sm:text-4xl">
+          ¡HOLA${quien ? ', ' + quien : ''}! ${quien ? Perfil.emojiDe(quien) : '👋'}
+        </h2>
+        <p class="font-titulo font-bold text-sm sm:text-xl text-tinta/70 mt-1">TOCÁ UN DIBUJO PARA JUGAR</p>
+      </div>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        ${AREAS.map(a => `
+          <button data-area="${a.id}" class="btn3d ${a.color} rounded-3xl p-4 text-center">
+            <div class="text-5xl sm:text-6xl mb-1 flota">${a.emoji}</div>
+            <div class="font-titulo font-extrabold text-xs sm:text-base leading-tight">${a.nombre}</div>
+            <div class="mt-2 bg-white/70 rounded-2xl py-1 font-titulo font-extrabold text-sm">
+              ⭐ ${Puntaje.leer(a.id)}</div>
+          </button>`).join('')}
+      </div>
+
+      <div class="mt-6 bg-amarillo/50 rounded-3xl px-6 py-4 inline-block">
+        <div class="font-titulo font-bold text-tinta/70 text-sm">TOTAL DE ESTRELLAS</div>
+        <div class="font-titulo font-extrabold text-4xl">⭐ ${total}</div>
+      </div>
+    </div>`;
+
+  vista.querySelectorAll('[data-area]').forEach(b =>
+    b.addEventListener('click', () => { Sonido.toque(); menuBloque(b.dataset.area); }));
+}
+
+/* ==================================================================
+   PANTALLA 3 · LOS 2 JUEGOS DE UN BLOQUE
+   ================================================================== */
+function menuBloque(areaId){
+  UI.cancelarFestejo();          // idem: el menú manda
+  const a = AREAS.find(x => x.id === areaId);
+  Puntaje.empezar(areaId, UI.marcador);
+
+  vista.innerHTML = `
+    <div class="text-center no-sel">
+      <div class="text-6xl flota mb-1">${a.emoji}</div>
+      <h2 class="font-titulo font-extrabold text-2xl sm:text-3xl">${a.nombre}</h2>
+      <p class="font-bold text-tinta/50 mb-5">ELEGÍ UN JUEGO</p>
+      <div class="grid gap-4 sm:grid-cols-2 max-w-2xl mx-auto">
+        ${JUEGOS[areaId].map(j => `
+          <button data-j="${j.id}" class="btn3d ${a.color} rounded-3xl p-5 text-left">
+            <div class="text-5xl mb-2 text-center">${j.emoji}</div>
+            <div class="font-titulo font-extrabold text-lg sm:text-xl">${j.nombre}</div>
+            <div class="text-sm font-bold text-tinta/70 mt-1">${j.desc}</div>
+          </button>`).join('')}
+      </div>
+      <button id="bb-volver-panel" class="btn3d bg-white border-2 border-tinta/10 rounded-3xl px-6 py-4 mt-6
+        font-titulo font-bold">🏠 INICIO</button>
+    </div>`;
+
+  vista.querySelectorAll('[data-j]').forEach(b => b.addEventListener('click', () => {
+    Sonido.toque();
+    JUEGO_ACTUAL = { area:areaId, juego:b.dataset.j };
+    LANZAR[b.dataset.j]();
+  }));
+  vista.querySelector('#bb-volver-panel').addEventListener('click', panelInicio);
+}
+
+let JUEGO_ACTUAL = null;
+const volverAlMenu = () => menuBloque(JUEGO_ACTUAL.area);
+const repetir      = () => LANZAR[JUEGO_ACTUAL.juego]();
+
+
+/* ==================================================================
+   📚 LECTOESCRITURA 1 · ARMÁ LA PALABRA (SÍLABAS)
+   ================================================================== */
+function jArmarSilabas(){
+  const candidatas = BANCO.PALABRAS.filter(p =>
+    p.twemoji && !p.texto.includes(' ') && p.cat !== 'nombres');
+  const p = alAzar(candidatas);
+  const sil = Silabas.separar(p.texto);
+  const sobra = tomar(['PA','TO','LE','MI','SU','RO','NA','TE','LU','SI'].filter(s => !sil.includes(s)), 2);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('ARMÁ LA PALABRA','ARRASTRÁ LAS SÍLABAS A SU LUGAR')}
+      <div class="my-3">${UI.escena(dibujo(p, 'w-24 h-24'))}</div>
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${sil.map((_, i) => `<div class="zz w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-cielo/25
+          border-4 border-dashed border-cielo flex items-center justify-center
+          font-titulo font-extrabold text-2xl transition-transform" data-i="${i}"></div>`).join('')}
+      </div>
+      <div class="bg-crema rounded-3xl p-3 border-4 border-amarillo/60">
+        <p class="font-titulo font-bold text-tinta/60 text-sm mb-2">BANCO DE SÍLABAS</p>
+        <div class="flex flex-wrap justify-center gap-2">
+          ${mezclar([...sil, ...sobra]).map(s => `<div class="ff btn3d bg-amarillo rounded-3xl px-4 py-3
+            min-w-[4.5rem] font-titulo font-extrabold text-2xl" data-val="${s}">${s}</div>`).join('')}
+        </div>
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA PALABRA ➡️' })}
+    </div>`;
+
+  let ok = 0;
+  vista.querySelectorAll('.zz').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.ff').forEach(f => { Drag.ficha(f);
+    f.addEventListener('click', () => Voz.hablar(f.dataset.val)); });
+
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zz') || z.dataset.ok) return;
+    if (f.dataset.val === sil[+z.dataset.i]){
+      z.textContent = f.dataset.val; z.dataset.ok = 1;
+      z.classList.remove('bg-cielo/25','border-dashed');
+      z.classList.add('bg-verde','border-solid','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Voz.hablar(f.dataset.val); Puntaje.sumar(1);
+      if (++ok === sil.length){ Puntaje.sumar(2);
+        setTimeout(() => Voz.hablar(p.texto), 500);
+        UI.festejar(p.texto, jArmarSilabas); }
+    } else UI.error(z);
+  });
+
+  UI.conectarBarra({ escuchar:() => Voz.hablar(p.texto), siguiente:jArmarSilabas, menu:volverAlMenu });
+  Voz.hablar(p.texto);
+}
+
+/* ==================================================================
+   📚 LECTOESCRITURA 2 · CREÁ PALABRAS (TECLADO DE SÍLABAS)
+   ================================================================== */
+const V = ['A','E','I','O','U'];
+const TECLADO = {
+  SIMPLES: ['B','C','CH','D','F','G','H','J','L','LL','M','N','Ñ','P','R','RR','S','T','V','Y','Z']
+             .flatMap(c => V.map(v => c + v))
+             .concat(['QUE','QUI','GUE','GUI','CE','CI','GE','GI']),
+  'TRABADAS L': ['BL','CL','FL','GL','PL'].flatMap(c => V.map(v => c + v)),
+  'TRABADAS R': ['BR','CR','DR','FR','GR','PR','TR'].flatMap(c => V.map(v => c + v)),
+  INVERSAS: V.flatMap(v => ['L','R','N','S','M'].map(c => v + c)),
+  LETRAS: 'ABCDEFGHIJLMNÑOPQRSTUVYZ'.split('')
+};
+
+function jCrearPalabras(){
+  let armada = '', encontradas = JSON.parse(localStorage.getItem('bb_encontradas') || '[]');
+  let pestania = 'SIMPLES';
+
+  function pintar(){
+    vista.innerHTML = `
+      <div class="text-center">
+        ${UI.consigna('CREÁ TUS PROPIAS PALABRAS','TOCÁ LAS SÍLABAS Y ARMÁ UNA PALABRA DE VERDAD')}
+
+        <div class="bg-crema rounded-3xl border-4 border-cielo p-3 my-4 min-h-[6rem] flex flex-col justify-center">
+          <div id="pizarra" class="font-titulo font-extrabold text-3xl sm:text-5xl tracking-wide min-h-[3rem]">
+            ${armada || '<span class="text-tinta/25">…</span>'}</div>
+          <div id="aviso" class="font-titulo font-bold text-sm mt-1 min-h-[1.25rem]"></div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-2 mb-3">
+          <button id="bBorrar" class="btn3d bg-rosa rounded-2xl px-4 py-3 font-titulo font-extrabold">⌫ BORRAR</button>
+          <button id="bLimpiar" class="btn3d bg-white border-2 border-tinta/10 rounded-2xl px-4 py-3 font-titulo font-bold">LIMPIAR</button>
+          <button id="bProbar" class="btn3d bg-verde rounded-2xl px-5 py-3 font-titulo font-extrabold">✅ ¿EXISTE?</button>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-1.5 mb-2">
+          ${Object.keys(TECLADO).map(t => `<button data-p="${t}"
+            class="btn3d rounded-2xl px-3 py-2 font-titulo font-extrabold text-xs sm:text-sm
+            ${t === pestania ? 'bg-cielo' : 'bg-white border-2 border-tinta/10'}">${t}</button>`).join('')}
+        </div>
+
+        <div class="bg-crema rounded-3xl p-2 border-4 border-amarillo/60 max-h-52 overflow-y-auto">
+          <div class="flex flex-wrap justify-center gap-1.5">
+            ${TECLADO[pestania].map(s => `<button data-s="${s}"
+              class="btn3d bg-amarillo rounded-2xl px-3 py-2 font-titulo font-extrabold text-lg
+              min-w-[3rem]">${s}</button>`).join('')}
+          </div>
+        </div>
+
+        <div class="mt-4 bg-verde/25 rounded-3xl p-3">
+          <p class="font-titulo font-extrabold text-sm">PALABRAS QUE ENCONTRASTE: ${encontradas.length}</p>
+          <div class="flex flex-wrap justify-center gap-1.5 mt-2">
+            ${encontradas.slice(-14).map(w => `<span class="bg-white rounded-xl px-2 py-1
+              font-titulo font-bold text-xs">${w}</span>`).join('') ||
+              '<span class="text-tinta/40 font-bold text-xs">TODAVÍA NINGUNA. ¡PROBÁ CON "SO" + "L"!</span>'}
+          </div>
+        </div>
+        ${UI.barra({ escuchar:false, textoSiguiente:'🔄 EMPEZAR DE NUEVO' })}
+      </div>`;
+
+    vista.querySelectorAll('[data-p]').forEach(b => b.addEventListener('click', () => {
+      pestania = b.dataset.p; Sonido.toque(); pintar();
+    }));
+    vista.querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => {
+      armada += b.dataset.s; Voz.hablar(b.dataset.s); actualizar();
+    }));
+    vista.querySelector('#bBorrar').addEventListener('click', () => {
+      armada = armada.slice(0, -1); actualizar();
+    });
+    vista.querySelector('#bLimpiar').addEventListener('click', () => { armada = ''; actualizar(); });
+    vista.querySelector('#bProbar').addEventListener('click', probar);
+    UI.conectarBarra({ siguiente:() => { armada = ''; pintar(); }, menu:volverAlMenu });
+  }
+
+  function actualizar(){
+    const pz = vista.querySelector('#pizarra');
+    pz.innerHTML = armada || '<span class="text-tinta/25">…</span>';
+    vista.querySelector('#aviso').textContent = '';
+  }
+
+  function probar(){
+    if (armada.length < 2) return;
+    const p = BANCO.buscar(armada);
+    const aviso = vista.querySelector('#aviso');
+    if (p && !encontradas.includes(p.texto)){
+      encontradas.push(p.texto);
+      localStorage.setItem('bb_encontradas', JSON.stringify(encontradas));
+      Puntaje.sumar(3);
+      Voz.hablar(p.texto);
+      UI.festejar(`${p.texto}<div class="mt-2">${dibujo(p, 'w-20 h-20')}</div>`, () => { armada = ''; pintar(); });
+    } else if (p){
+      aviso.innerHTML = '<span class="text-cielo">✅ ' + p.texto + ' — YA LA HABÍAS ENCONTRADO</span>';
+      Sonido.ok(); Voz.hablar(p.texto);
+    } else {
+      aviso.innerHTML = '<span class="text-tinta/50">ESA PALABRA NO EXISTE. ¡SEGUÍ PROBANDO!</span>';
+      UI.error(vista.querySelector('#pizarra'));
+    }
+  }
+  pintar();
+  Voz.hablar('armá una palabra con las sílabas');
+}
+
+/* ==================================================================
+   🧩 LÓGICA 1 · ROMPECABEZAS (usa las escenas hechas con IA)
+   ================================================================== */
+function jPuzzle(){
+  const esc = alAzar(ESCENAS);
+  const F = 2, C = 3;                       // 2 filas × 3 columnas = 6 piezas
+  const piezas = [];
+  for (let f = 0; f < F; f++) for (let c = 0; c < C; c++) piezas.push({ f, c, i:f*C + c });
+
+  const estilo = pz => `background-image:url('img/propias/${esc.archivo}');
+    background-size:${C * 100}% ${F * 100}%;
+    background-position:${(pz.c / (C-1)) * 100}% ${(pz.f / (F-1)) * 100}%;`;
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('ARMÁ EL ROMPECABEZAS', esc.nombre + ' · ARRASTRÁ CADA PIEZA A SU LUGAR')}
+      <div class="mx-auto my-4 grid gap-1 bg-cielo/20 p-2 rounded-3xl border-4 border-dashed border-cielo"
+           style="grid-template-columns:repeat(${C},1fr);max-width:26rem">
+        ${piezas.map(pz => `<div class="zp aspect-[4/3] rounded-xl bg-white/60 transition-transform"
+          data-i="${pz.i}"></div>`).join('')}
+      </div>
+      <div class="bg-crema rounded-3xl p-2 border-4 border-amarillo/60">
+        <p class="font-titulo font-bold text-tinta/60 text-sm mb-2">LAS PIEZAS</p>
+        <div class="flex flex-wrap justify-center gap-1.5">
+          ${mezclar([...piezas]).map(pz => `<div class="fp btn3d rounded-xl bg-cover"
+            data-val="${pz.i}" style="${estilo(pz)}width:5.5rem;height:4.125rem"></div>`).join('')}
+        </div>
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO DIBUJO ➡️' })}
+    </div>`;
+
+  let ok = 0;
+  vista.querySelectorAll('.zp').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fp').forEach(f => Drag.ficha(f));
+
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zp') || z.dataset.ok) return;
+    if (z.dataset.i === f.dataset.val){
+      // Copiamos SOLO lo del fondo, no el ancho ni el alto de la ficha:
+      // la zona tiene que conservar su tamaño dentro de la grilla.
+      const pz = piezas[+z.dataset.i];
+      z.style.backgroundImage    = `url('img/propias/${esc.archivo}')`;
+      z.style.backgroundSize     = `${C * 100}% ${F * 100}%`;
+      z.style.backgroundPosition = `${(pz.c / (C-1)) * 100}% ${(pz.f / (F-1)) * 100}%`;
+      z.classList.add('pop'); z.classList.remove('bg-white/60');
+      z.dataset.ok = 1;
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(1);
+      if (++ok === piezas.length){ Puntaje.sumar(3);
+        Voz.hablar('armaste ' + esc.nombre);
+        UI.festejar(esc.nombre, jPuzzle); }
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jPuzzle, menu:volverAlMenu });
+  Voz.hablar('armá el rompecabezas de ' + esc.nombre);
+}
+
+/* ==================================================================
+   🧩 LÓGICA 2 · MEMORIA PALABRA ↔ DIBUJO
+   ================================================================== */
+function jMemo(){
+  const elegidas = tomar(BANCO.PALABRAS.filter(p =>
+    p.twemoji && !p.texto.includes(' ') && p.cat !== 'nombres' && p.largo <= 8), 4);
+
+  const cartas = mezclar(elegidas.flatMap(p => [
+    { par:p.plano, tipo:'img', p }, { par:p.plano, tipo:'txt', p }
+  ]));
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('JUEGO DE MEMORIA','UNÍ CADA PALABRA CON SU DIBUJO')}
+      <div class="grid grid-cols-4 gap-2 max-w-lg mx-auto my-5">
+        ${cartas.map((c, i) => `<button class="cm aspect-square rounded-3xl bg-rosa btn3d
+          flex items-center justify-center p-1" data-i="${i}" data-par="${c.par}">
+          <span class="cara text-3xl sm:text-4xl">❓</span></button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'🔄 DE NUEVO' })}
+    </div>`;
+
+  const dom = [...vista.querySelectorAll('.cm')];
+  let abiertas = [], bloqueado = false, pares = 0;
+
+  dom.forEach((b, i) => b.addEventListener('click', () => {
+    if (bloqueado || b.dataset.ok || abiertas.includes(b)) return;
+    const c = cartas[i];
+    const cara = b.querySelector('.cara');
+    cara.innerHTML = c.tipo === 'img'
+      ? dibujo(c.p, 'w-10 h-10 sm:w-12 sm:h-12')
+      : `<span class="font-titulo font-extrabold text-[10px] sm:text-sm leading-tight">${c.p.texto}</span>`;
+    b.classList.add('pop');
+    Voz.hablar(c.p.texto);
+    abiertas.push(b);
+
+    if (abiertas.length === 2){
+      const [x, y] = abiertas;
+      if (x.dataset.par === y.dataset.par){
+        x.dataset.ok = y.dataset.ok = 1;
+        [x, y].forEach(e => { e.classList.remove('bg-rosa'); e.classList.add('bg-verde'); });
+        Sonido.ok(); Puntaje.sumar(2); abiertas = [];
+        if (++pares === elegidas.length){ Puntaje.sumar(2); UI.festejar('¡TODAS LAS PAREJAS!', jMemo); }
+      } else {
+        bloqueado = true; Sonido.error();
+        [x, y].forEach(e => e.classList.add('shake'));
+        setTimeout(() => {
+          [x, y].forEach(e => { e.classList.remove('shake'); e.querySelector('.cara').innerHTML = '❓'; });
+          abiertas = []; bloqueado = false;
+        }, 900);
+      }
+    }
+  }));
+  UI.conectarBarra({ siguiente:jMemo, menu:volverAlMenu });
+}
+
+/* ==================================================================
+   🌎 INGLÉS 1 · LISTEN AND CHOOSE
+   ================================================================== */
+function jListen(){
+  const correcta = alAzar(INGLES);
+  const opciones = mezclar([correcta, ...tomar(INGLES.filter(x => x.en !== correcta.en), 2)]);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('LISTEN AND CHOOSE','ESCUCHÁ Y TOCÁ EL DIBUJO CORRECTO')}
+      <button id="bRep" class="btn3d bg-amarillo rounded-3xl px-8 py-6 my-5
+        font-titulo font-extrabold text-2xl sm:text-3xl">🔊 ${correcta.en}</button>
+      <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+        ${opciones.map(o => {
+          const p = BANCO.buscar(o.es);
+          return `<button class="op aspect-square rounded-3xl bg-cielo btn3d flex items-center
+            justify-center p-3" data-ok="${o.en === correcta.en}">${dibujo(p,'w-full h-full')}</button>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'NEXT ➡️' })}
+    </div>`;
+
+  const decir = () => Voz.hablar(correcta.en, 'en');
+  vista.querySelector('#bRep').addEventListener('click', decir);
+  vista.querySelectorAll('.op').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.remove('bg-cielo'); b.classList.add('bg-verde','pop');
+      Sonido.ok(); Puntaje.sumar(2);
+      setTimeout(decir, 250);
+      UI.festejar(correcta.en + ' = ' + correcta.es, jListen);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jListen, menu:volverAlMenu });
+  setTimeout(decir, 500);
+}
+
+/* ==================================================================
+   🌎 INGLÉS 2 · MATCH THE WORD
+   ================================================================== */
+function jMatch(){
+  const tres = tomar(INGLES, 3);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('MATCH THE WORD','ARRASTRÁ CADA PALABRA A SU DIBUJO')}
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${mezclar([...tres]).map(o => `<div class="fw btn3d bg-amarillo rounded-3xl px-4 py-3
+          font-titulo font-extrabold text-xl" data-val="${o.en}">${o.en}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+        ${tres.map(o => {
+          const p = BANCO.buscar(o.es);
+          return `<div class="zw rounded-3xl bg-cielo/25 border-4 border-dashed border-cielo p-3
+            transition-transform" data-val="${o.en}">
+            ${dibujo(p,'w-full h-16 sm:h-20')}
+            <div class="destino font-titulo font-extrabold text-sm mt-1 min-h-[1.25rem]"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'NEXT ➡️' })}
+    </div>`;
+
+  let ok = 0;
+  vista.querySelectorAll('.zw').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fw').forEach(f => { Drag.ficha(f);
+    f.addEventListener('click', () => Voz.hablar(f.dataset.val, 'en')); });
+
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zw') || z.dataset.ok) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('.destino').textContent = f.dataset.val;
+      z.dataset.ok = 1;
+      z.classList.remove('bg-cielo/25','border-dashed');
+      z.classList.add('bg-verde','border-solid','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Voz.hablar(f.dataset.val, 'en'); Puntaje.sumar(2);
+      if (++ok === tres.length) UI.festejar('VERY GOOD!', jMatch);
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jMatch, menu:volverAlMenu });
+}
+
+/* ==================================================================
+   🔢 MATEMÁTICA 1 · ¿CUÁNTOS HAY?
+   ================================================================== */
+function jContar(){
+  const p = alAzar(BANCO.filtrar({ cat:'comidas', conDibujo:true })
+    .concat(BANCO.filtrar({ cat:'animales', conDibujo:true })));
+  const n = 1 + Math.floor(Math.random() * 9);
+  const ops = mezclar([n, ...tomar([1,2,3,4,5,6,7,8,9,10].filter(x => x !== n), 2)]);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿CUÁNTOS HAY?','ARRASTRÁ EL NÚMERO CORRECTO')}
+      <div class="bg-crema rounded-3xl border-4 border-verde/60 p-4 my-4 flex flex-wrap
+        justify-center items-center gap-1">
+        ${Array.from({length:n}, () => dibujo(p, 'w-12 h-12 sm:w-14 sm:h-14')).join('')}
+      </div>
+      <div class="flex justify-center my-4">
+        <div id="zn" class="w-24 h-24 rounded-3xl bg-verde/25 border-4 border-dashed border-verde
+          flex items-center justify-center font-titulo font-extrabold text-4xl transition-transform">?</div>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${ops.map(x => `<div class="fn btn3d bg-lila rounded-3xl w-20 h-20 flex items-center
+          justify-center font-titulo font-extrabold text-4xl" data-val="${x}">${x}</div>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+
+  const z = vista.querySelector('#zn');
+  Drag.zona(z);
+  vista.querySelectorAll('.fn').forEach(f => { Drag.ficha(f);
+    f.addEventListener('click', () => Voz.hablar(f.dataset.val)); });
+
+  Drag.alSoltar((zona, f) => {
+    if (zona !== z || z.dataset.ok) return;
+    if (+f.dataset.val === n){
+      z.textContent = n; z.dataset.ok = 1;
+      z.classList.remove('bg-verde/25','border-dashed');
+      z.classList.add('bg-verde','border-solid','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('HAY ' + n, jContar);
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ escuchar:() => Voz.hablar('cuántos hay'), siguiente:jContar, menu:volverAlMenu });
+  Voz.hablar('cuántos hay');
+}
+
+/* ==================================================================
+   🔢 MATEMÁTICA 2 · SUMAS CON DIBUJOS
+   ================================================================== */
+function jSumar(){
+  const p = alAzar(BANCO.filtrar({ cat:'comidas', conDibujo:true }));
+  const a = 1 + Math.floor(Math.random() * 5);
+  const b = 1 + Math.floor(Math.random() * 5);
+  const r = a + b;
+  const ops = mezclar([r, ...tomar([1,2,3,4,5,6,7,8,9,10].filter(x => x !== r), 2)]);
+  const fila = k => Array.from({length:k}, () => dibujo(p, 'w-9 h-9 sm:w-11 sm:h-11')).join('');
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿CUÁNTO ES?','CONTÁ TODO Y ARRASTRÁ EL RESULTADO')}
+      <div class="bg-crema rounded-3xl border-4 border-verde/60 p-4 my-4">
+        <div class="flex flex-wrap items-center justify-center gap-2">
+          <div class="flex flex-wrap justify-center gap-1 max-w-[9rem]">${fila(a)}</div>
+          <span class="font-titulo font-extrabold text-4xl">+</span>
+          <div class="flex flex-wrap justify-center gap-1 max-w-[9rem]">${fila(b)}</div>
+          <span class="font-titulo font-extrabold text-4xl">=</span>
+          <div id="zs" class="w-20 h-20 rounded-3xl bg-verde/25 border-4 border-dashed border-verde
+            flex items-center justify-center font-titulo font-extrabold text-4xl transition-transform">?</div>
+        </div>
+        <p class="font-titulo font-extrabold text-2xl mt-3 text-tinta/50">${a} + ${b}</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${ops.map(x => `<div class="fs btn3d bg-lila rounded-3xl w-20 h-20 flex items-center
+          justify-center font-titulo font-extrabold text-4xl" data-val="${x}">${x}</div>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+
+  const z = vista.querySelector('#zs');
+  Drag.zona(z);
+  vista.querySelectorAll('.fs').forEach(f => { Drag.ficha(f);
+    f.addEventListener('click', () => Voz.hablar(f.dataset.val)); });
+
+  Drag.alSoltar((zona, f) => {
+    if (zona !== z || z.dataset.ok) return;
+    if (+f.dataset.val === r){
+      z.textContent = r; z.dataset.ok = 1;
+      z.classList.remove('bg-verde/25','border-dashed');
+      z.classList.add('bg-verde','border-solid','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(3);
+      Voz.hablar(a + ' más ' + b + ' es ' + r);
+      UI.festejar(a + ' + ' + b + ' = ' + r, jSumar);
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ escuchar:() => Voz.hablar(a + ' más ' + b), siguiente:jSumar, menu:volverAlMenu });
+  Voz.hablar(a + ' más ' + b);
+}
+
+/* ==================================================================
+   🔬 CIENCIAS 1 · A SU HOGAR
+   ================================================================== */
+function jHabitat(){
+  const elegidos = HABITATS.flatMap(h =>
+    tomar(h.animales, 2).map(a => ({ animal:BANCO.buscar(a), hogar:h.id })));
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('CADA ANIMAL A SU HOGAR','ARRASTRÁ AL LUGAR DONDE VIVE')}
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${mezclar([...elegidos]).map(e => `<div class="fa btn3d bg-white border-4 border-lila
+          rounded-3xl p-2" data-val="${e.hogar}">${dibujo(e.animal, 'w-12 h-12 sm:w-14 sm:h-14')}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        ${HABITATS.map(h => `<div class="zh rounded-3xl bg-lila/25 border-4 border-dashed border-lila
+          p-2 min-h-[9rem] transition-transform" data-val="${h.id}">
+          <div class="text-4xl">${h.emoji}</div>
+          <div class="font-titulo font-extrabold text-xs sm:text-base">${h.nombre}</div>
+          <div class="dentro flex flex-wrap justify-center gap-1 mt-1"></div>
+        </div>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTROS ➡️' })}
+    </div>`;
+
+  let ok = 0;
+  vista.querySelectorAll('.zh').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fa').forEach(f => Drag.ficha(f));
+
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zh')) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('.dentro').insertAdjacentHTML('beforeend',
+        `<span class="pop">${f.innerHTML.replace(/w-12 h-12 sm:w-14 sm:h-14/, 'w-8 h-8')}</span>`);
+      f.classList.add('invisible','pointer-events-none');
+      z.classList.add('pop'); setTimeout(() => z.classList.remove('pop'), 450);
+      Sonido.ok(); Puntaje.sumar(1);
+      if (++ok === elegidos.length){ Puntaje.sumar(2); UI.festejar('¡TODOS EN CASA!', jHabitat); }
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jHabitat, menu:volverAlMenu });
+  Voz.hablar('cada animal a su hogar');
+}
+
+/* ==================================================================
+   🔬 CIENCIAS 2 · SÍ O NO
+   ================================================================== */
+function jVF(){
+  const q = alAzar(VERDADEROFALSO);
+  const p = BANCO.buscar(q.palabra);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿ES VERDAD?','ESCUCHÁ, MIRÁ EL DIBUJO Y DECIDÍ')}
+      <div class="my-4">${UI.escena(dibujo(p, 'w-24 h-24'), '#EDE9FE')}</div>
+      <div class="bg-crema rounded-3xl border-4 border-lila/60 p-4 my-4">
+        <p class="font-titulo font-extrabold text-xl sm:text-2xl">${q.texto}</p>
+      </div>
+      <div class="flex justify-center gap-5">
+        <button class="rp btn3d bg-verde rounded-3xl w-28 h-28 text-6xl" data-r="true">✅</button>
+        <button class="rp btn3d bg-rosa rounded-3xl w-28 h-28 text-6xl" data-r="false">❌</button>
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+
+  vista.querySelectorAll('.rp').forEach(b => b.addEventListener('click', () => {
+    if ((b.dataset.r === 'true') === q.ok){
+      b.classList.add('pop'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(q.ok ? '¡SÍ, ES VERDAD!' : '¡NO, ES MENTIRA!', jVF);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar(q.texto), siguiente:jVF, menu:volverAlMenu });
+  Voz.hablar(q.texto);
+}
+
+/* ==================================================================
+   🎨 COLORES 1 · TOCÁ EL COLOR
+   ================================================================== */
+function jColor(){
+  const cs = tomar(COLORES_JUEGO, 4);
+  const correcto = alAzar(cs);
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('TOCÁ EL COLOR','ESCUCHÁ QUÉ COLOR ES Y TOCALO')}
+      <button id="bDec" class="btn3d bg-amarillo rounded-3xl px-10 py-6 my-5
+        font-titulo font-extrabold text-3xl sm:text-4xl">🔊 ${correcto}</button>
+      <div class="grid grid-cols-4 gap-3 max-w-lg mx-auto">
+        ${mezclar([...cs]).map(c => {
+          const p = BANCO.buscar(c);
+          return `<button class="oc aspect-square rounded-3xl bg-white border-4 border-naranja btn3d
+            flex items-center justify-center p-3" data-ok="${c === correcto}">
+            ${Img.html(p, 'w-full h-full', { comoColor:true })}</button>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+
+  const decir = () => Voz.hablar('tocá el color ' + correcto);
+  vista.querySelector('#bDec').addEventListener('click', decir);
+  vista.querySelectorAll('.oc').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(correcto, jColor);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jColor, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+/* ==================================================================
+   🎨 COLORES 2 · LAS FORMAS EN SU HUECO
+   ================================================================== */
+function jFormas(){
+  const cuatro = tomar(FORMAS, 4);
+  const tintes = ['#7DD3FC','#F9A8D4','#FDE68A','#86EFAC','#C4B5FD'];
+  const svg = (f, fill, lado) =>
+    `<svg viewBox="0 0 100 100" class="${lado}" fill="${fill}" stroke="#334155" stroke-width="4">${f.svg}</svg>`;
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('CADA FORMA EN SU HUECO','ARRASTRÁ LA FORMA AL AGUJERO IGUAL')}
+      <div class="flex flex-wrap justify-center gap-3 my-4">
+        ${mezclar([...cuatro]).map((f, i) => `<div class="fq btn3d bg-white rounded-3xl p-2"
+          data-val="${f.id}">${svg(f, tintes[i % tintes.length], 'w-16 h-16')}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-4 gap-2 max-w-xl mx-auto">
+        ${cuatro.map(f => `<div class="zq rounded-3xl bg-tinta/5 border-4 border-dashed border-tinta/20
+          p-2 transition-transform" data-val="${f.id}">
+          ${svg(f, '#E2E8F0', 'w-full h-16')}
+          <div class="font-titulo font-extrabold text-[10px] sm:text-xs mt-1">${f.nombre}</div>
+        </div>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRAS ➡️' })}
+    </div>`;
+
+  let ok = 0;
+  vista.querySelectorAll('.zq').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fq').forEach(f => { Drag.ficha(f);
+    f.addEventListener('click', () => Voz.hablar(FORMAS.find(x => x.id === f.dataset.val).nombre)); });
+
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zq') || z.dataset.ok) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('svg').setAttribute('fill', '#86EFAC');
+      z.dataset.ok = 1;
+      z.classList.remove('bg-tinta/5','border-dashed');
+      z.classList.add('bg-verde/40','border-solid','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Voz.hablar(FORMAS.find(x => x.id === f.dataset.val).nombre); Puntaje.sumar(1);
+      if (++ok === cuatro.length){ Puntaje.sumar(2); UI.festejar('¡TODAS ENCASTRADAS!', jFormas); }
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jFormas, menu:volverAlMenu });
+  Voz.hablar('cada forma en su hueco');
+}
+
+/* ==================================================================
+   ✏️ CALIGRAFÍA · TRAZAR (letras y números comparten el motor)
+   ================================================================== */
+function trazar(set, titulo){
+  let i = 0;
+
+  function pintar(){
+    const ch = set[i];
+    const guia = TRAZOS[ch] || [];
+
+    vista.innerHTML = `
+      <div class="text-center">
+        ${UI.consigna('TRAZÁ LA ' + (titulo === 'LETRAS' ? 'LETRA ' : '') + ch,
+                      'SEGUÍ LOS PUNTITOS CON EL DEDO · LOS NUMERITOS DICEN EL ORDEN')}
+        <div class="flex justify-center my-4">
+          <canvas id="cv" width="220" height="220" class="trazo bg-crema rounded-3xl
+            border-4 border-cielo shadow-inner touch-none"></canvas>
+        </div>
+        <div class="flex flex-wrap justify-center gap-2 mb-3">
+          ${set.map((c, k) => `<button data-k="${k}" class="btn3d rounded-2xl w-11 h-11
+            font-titulo font-extrabold ${k === i ? 'bg-cielo' : 'bg-white border-2 border-tinta/10'}">${c}</button>`).join('')}
+        </div>
+        <div class="flex flex-wrap justify-center gap-3 no-sel">
+          <button id="bBorr" class="btn3d bg-rosa rounded-3xl px-5 py-4 font-titulo font-extrabold">🧽 BORRAR</button>
+          <button id="bb-escuchar" class="btn3d bg-amarillo rounded-3xl px-5 py-4 font-titulo font-extrabold">🔊 ESCUCHAR</button>
+          <button id="bb-siguiente" class="btn3d bg-verde rounded-3xl px-5 py-4 font-titulo font-extrabold">SIGUIENTE ➡️</button>
+          <button id="bb-menu" class="btn3d bg-white border-2 border-tinta/10 rounded-3xl px-5 py-4 font-titulo font-bold">🏠 MENÚ</button>
+        </div>
+      </div>`;
+
+    const cv = vista.querySelector('#cv'), cx = cv.getContext('2d');
+    let pintando = false, recorrido = 0, ultimo = null, hecho = false;
+    // Cuánto hay que trazar: el largo real de la guía, con margen para no frustrar
+    const largoGuia = guia.reduce((s, [a, b]) => s + Math.hypot(b[0]-a[0], b[1]-a[1]), 0);
+    const meta = Math.max(120, largoGuia * 0.62);
+
+    function dibujarGuia(){
+      cx.clearRect(0, 0, 220, 220);
+      cx.setLineDash([7, 9]); cx.lineWidth = 13; cx.strokeStyle = '#CBD5E1'; cx.lineCap = 'round';
+      guia.forEach(([a, b]) => { cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0], b[1]); cx.stroke(); });
+      cx.setLineDash([]);
+      guia.forEach(([a], k) => {
+        cx.fillStyle = '#7DD3FC'; cx.beginPath(); cx.arc(a[0], a[1], 11, 0, 7); cx.fill();
+        cx.fillStyle = '#fff'; cx.font = 'bold 14px Nunito, sans-serif';
+        cx.textAlign = 'center'; cx.textBaseline = 'middle'; cx.fillText(k + 1, a[0], a[1] + 1);
+      });
+    }
+    dibujarGuia();
+
+    const punto = e => {
+      const r = cv.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      return { x:(t.clientX - r.left) * 220 / r.width, y:(t.clientY - r.top) * 220 / r.height };
+    };
+    const arrancar = e => { e.preventDefault(); pintando = true; ultimo = punto(e); };
+    const mover = e => {
+      if (!pintando) return; e.preventDefault();
+      const q = punto(e);
+      cx.strokeStyle = '#F472B6'; cx.lineWidth = 11; cx.lineCap = cx.lineJoin = 'round';
+      cx.beginPath(); cx.moveTo(ultimo.x, ultimo.y); cx.lineTo(q.x, q.y); cx.stroke();
+      recorrido += Math.hypot(q.x - ultimo.x, q.y - ultimo.y);
+      ultimo = q;
+      if (!hecho && recorrido > meta){
+        hecho = true; Puntaje.sumar(2);
+        setTimeout(() => Voz.hablar(titulo === 'LETRAS' ? 'la letra ' + ch : 'el ' + ch), 300);
+        UI.festejar((titulo === 'LETRAS' ? 'LETRA ' : '') + ch, siguiente);
+      }
+    };
+    const soltar = () => { pintando = false; };
+
+    cv.addEventListener('mousedown', arrancar);
+    cv.addEventListener('mousemove', mover);
+    addEventListener('mouseup', soltar);
+    cv.addEventListener('touchstart', arrancar, { passive:false });
+    cv.addEventListener('touchmove', mover, { passive:false });
+    cv.addEventListener('touchend', soltar);
+
+    vista.querySelector('#bBorr').addEventListener('click', () => {
+      recorrido = 0; hecho = false; dibujarGuia();
+    });
+    vista.querySelectorAll('[data-k]').forEach(b => b.addEventListener('click', () => {
+      i = +b.dataset.k; pintar();
+    }));
+    UI.conectarBarra({
+      escuchar:() => Voz.hablar(titulo === 'LETRAS' ? 'la letra ' + ch : 'el ' + ch),
+      siguiente, menu:volverAlMenu });
+    Voz.hablar(titulo === 'LETRAS' ? 'trazá la letra ' + ch : 'trazá el ' + ch);
+  }
+
+  function siguiente(){ i = (i + 1) % set.length; pintar(); }
+  pintar();
+}
+
+/* ==================================================================
+   REGISTRO DE JUEGOS
+   ================================================================== */
+const LANZAR = {
+  silabas: jArmarSilabas,  crear: jCrearPalabras,
+  puzzle:  jPuzzle,        memo:  jMemo,
+  listen:  jListen,        match: jMatch,
+  contar:  jContar,        sumar: jSumar,
+  habitat: jHabitat,       vf:    jVF,
+  color:   jColor,         formas:jFormas,
+  letras:  () => trazar(LETRAS_DEMO,  'LETRAS'),
+  numeros: () => trazar(NUMEROS_DEMO, 'NÚMEROS')
+};
+
+/* ==================================================================
+   ARRANQUE
+   ================================================================== */
+function arrancar(){
+  vista = UI.consola({ titulo:'BUSY BOOK', emoji:'🎒', volverA:'#' });
+  // El ⬅️ del encabezado vuelve al panel, no sale de la página
+  document.querySelector('header a').addEventListener('click', e => { e.preventDefault(); panelInicio(); });
+  document.getElementById('bb-reiniciar').addEventListener('click', () => {
+    if (JUEGO_ACTUAL && LANZAR[JUEGO_ACTUAL.juego]) repetir(); else panelInicio();
+  });
+  panelInicio();
+}
+
+pantallaPerfil();
+</script>
+</html>
