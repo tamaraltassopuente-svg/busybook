@@ -800,6 +800,9 @@ const Sonido = (() => {
     error(){     nota(466, 0, 0.14, 'square', .18); nota(415, 0.12, 0.18, 'square', .18); },
     fanfarria(){ [523, 659, 784, 1046].forEach((f,i) => nota(f, i*0.10, 0.30, 'triangle', .22)); },
     toque(){     nota(880, 0, 0.06, 'sine', .13); },
+    /* Expuesta para el Xilófono/Piano: una nota musical real, no un
+       efecto de acierto/error. */
+    nota(freq, ini = 0, dur = 0.35, tipo = 'triangle', vol = 0.28){ nota(freq, ini, dur, tipo, vol); },
     activo(){ return ALM.get(CLAVE) !== 'no'; },
     activar(si){ ALM.set(CLAVE, si ? 'si' : 'no'); },
     desbloquear(){ ac(); }
@@ -1059,16 +1062,14 @@ const IMAGENES_PROPIAS = new Set([
    elegir un dibujo distinto según el contexto (ej: "el hermano de tu papá"
    usa la versión adulta) — esa lógica va a vivir en ese juego, no acá. */
 const ALIAS_IMG = {
-  hermano:'adolescente', primo:'adolescente', matheo:'adolescente', matteo:'adolescente',
-  hermana:'adolescente1', prima:'adolescente1', amiga:'adolescente1', lola:'adolescente1',
+  hermano:'adolescente', primo:'adolescente',
+  hermana:'adolescente1', prima:'adolescente1', amiga:'adolescente1',
   amigo:'nino', nene:'nino',
   nina:'nena',
-  tia:'mujer', senora:'mujer', tamara:'mujer', leila:'mujer', lule:'mujer',
-  seno:'mujer', sol:'mujer', euge:'mujer', eugenia:'mujer',
-  tio:'senor', hombre:'senor', cristian:'senor', gustavo:'senor', gonzalo:'senor',
-  martin:'senor', matias:'senor',
-  vieja:'abuela', viejita:'abuela', dafne:'abuela', norma:'abuela',
-  viejo:'abuelo', viejito:'abuelo', walter:'abuelo'
+  tia:'mujer', senora:'mujer', seno:'mujer',
+  tio:'senor', hombre:'senor',
+  vieja:'abuela', viejita:'abuela',
+  viejo:'abuelo', viejito:'abuelo'
 };
 
 const Img = (() => {
@@ -1505,42 +1506,85 @@ const JUEGOS = {
     { id:'silabas',  nombre:'ARMÁ LA PALABRA', emoji:'🧩', desc:'ARRASTRÁ LAS SÍLABAS' },
     { id:'crear',    nombre:'CREÁ PALABRAS',   emoji:'⌨️', desc:'ESCRIBÍ CON SÍLABAS' },
     { id:'sopa',     nombre:'SOPA DE LETRAS',  emoji:'🔎', desc:'BUSCÁ LAS PALABRAS' },
-    { id:'flechas',  nombre:'UNÍ CON FLECHAS', emoji:'➡️', desc:'PALABRA CON DIBUJO' } ],
+    { id:'flechas',  nombre:'UNÍ CON FLECHAS', emoji:'➡️', desc:'PALABRA CON DIBUJO' },
+    { id:'letraini', nombre:'¿CON QUÉ LETRA EMPIEZA?', emoji:'🔤', desc:'MIRÁ EL DIBUJO Y ELEGÍ' },
+    { id:'silfalt',  nombre:'COMPLETÁ LA SÍLABA', emoji:'✂️', desc:'FALTA UN PEDACITO' },
+    { id:'ahorcado', nombre:'ADIVINÁ LA PALABRA', emoji:'🎈', desc:'TOCÁ LAS LETRAS' },
+    { id:'trendias', nombre:'EL TREN DE LOS DÍAS', emoji:'🚃', desc:'¿QUÉ DÍA FALTA?' },
+    { id:'calendmes',nombre:'MESES Y ESTACIONES', emoji:'📅', desc:'¿QUÉ ESTACIÓN ES?' },
+    { id:'rima',     nombre:'¿QUÉ PALABRA RIMA?', emoji:'🎶', desc:'BUSCÁ LA QUE RIMA' } ],
   logica: [
     { id:'puzzle',   nombre:'ROMPECABEZAS',    emoji:'🧩', desc:'ARMÁ EL DIBUJO' },
     { id:'memo',     nombre:'MEMORIA',         emoji:'🃏', desc:'PALABRA CON DIBUJO' },
     { id:'patron',   nombre:'¿QUÉ SIGUE?',     emoji:'🔴', desc:'SEGUÍ EL PATRÓN' },
-    { id:'simon',    nombre:'SIMÓN DICE',      emoji:'🎵', desc:'REPETÍ LA SECUENCIA' } ],
+    { id:'simon',    nombre:'SIMÓN DICE',      emoji:'🎵', desc:'REPETÍ LA SECUENCIA' },
+    { id:'opuestos', nombre:'OPUESTOS',        emoji:'↔️', desc:'¿CUÁL ES LO CONTRARIO?' },
+    { id:'parejaslogica', nombre:'¿QUÉ VA CON QUÉ?', emoji:'🔗', desc:'UNÍ LAS PAREJAS' },
+    { id:'diferencias', nombre:'LAS DIFERENCIAS', emoji:'🔍', desc:'ENCONTRÁ LO QUE CAMBIÓ' },
+    { id:'clasificlog', nombre:'CLASIFICADOR', emoji:'📦', desc:'JUGUETES O ROPA' },
+    { id:'laberintolog', nombre:'LABERINTO LÓGICO', emoji:'🧭', desc:'ELEGÍ EL CAMINO' },
+    { id:'logintruso', nombre:'EL INTRUSO EN LA SERIE', emoji:'🕵️', desc:'¿CUÁL NO PERTENECE?' } ],
   ingles: [
     { id:'listen',   nombre:'LISTEN & CHOOSE', emoji:'👂', desc:'ESCUCHÁ Y TOCÁ' },
     { id:'match',    nombre:'MATCH THE WORD',  emoji:'🔗', desc:'UNÍ CON EL DIBUJO' },
     { id:'numbers',  nombre:'NUMBERS 1-100',   emoji:'🔟', desc:'LOS NÚMEROS EN INGLÉS' },
-    { id:'action',   nombre:'DO THE ACTION!',  emoji:'🏃', desc:'HACÉ LO QUE DICE' } ],
+    { id:'action',   nombre:'DO THE ACTION!',  emoji:'🏃', desc:'HACÉ LO QUE DICE' },
+    { id:'ingcolores', nombre:'COLORS',        emoji:'🌈', desc:'LOS COLORES EN INGLÉS' },
+    { id:'ingcuerpo',  nombre:'BODY & SENSES', emoji:'🧍', desc:'EL CUERPO EN INGLÉS' },
+    { id:'ingcomida',  nombre:'FOOD & DRINKS', emoji:'🍎', desc:'COMIDA EN INGLÉS' },
+    { id:'inganimales',nombre:'ANIMALS',       emoji:'🐶', desc:'ANIMALES EN INGLÉS' },
+    { id:'ingclima',   nombre:'WEATHER',       emoji:'⛅', desc:'EL CLIMA EN INGLÉS' },
+    { id:'ingtiempo',  nombre:'DAYS & MONTHS', emoji:'📅', desc:'DÍAS Y MESES EN INGLÉS' } ],
   matematica: [
     { id:'contar',   nombre:'¿CUÁNTOS HAY?',   emoji:'🔢', desc:'CONTÁ Y ARRASTRÁ' },
     { id:'sumar',    nombre:'SUMAS',           emoji:'➕', desc:'SUMÁ CON DIBUJOS' },
     { id:'restar',   nombre:'RESTAS',          emoji:'➖', desc:'SACÁ Y CONTÁ' },
-    { id:'ordenar',  nombre:'ORDENÁ NÚMEROS',  emoji:'📶', desc:'DEL MÁS CHICO AL MÁS GRANDE' } ],
+    { id:'ordenar',  nombre:'ORDENÁ NÚMEROS',  emoji:'📶', desc:'DEL MÁS CHICO AL MÁS GRANDE' },
+    { id:'bloqueslego', nombre:'LA TORRE DE BLOQUES', emoji:'🧱', desc:'CONTÁ LOS BLOQUES' },
+    { id:'sumaconstr', nombre:'SUMA CONSTRUCTORA', emoji:'🌉', desc:'ARMÁ EL PUENTE' },
+    { id:'tangram',  nombre:'TANGRAM',         emoji:'🔺', desc:'ARMÁ LA FIGURA' },
+    { id:'mayormenor', nombre:'MAYOR, MENOR O IGUAL', emoji:'⚖️', desc:'>  <  =' },
+    { id:'paresimpares', nombre:'PARES O IMPARES', emoji:'🔢', desc:'¿PAR O IMPAR?' },
+    { id:'quehoraes', nombre:'¿QUÉ HORA ES?',  emoji:'🕐', desc:'MIRÁ EL RELOJ' } ],
   ciencias: [
     { id:'habitat',  nombre:'A SU HOGAR',      emoji:'🏞️', desc:'DÓNDE VIVE CADA UNO' },
     { id:'vf',       nombre:'SÍ O NO',         emoji:'✅', desc:'¿ES VERDAD?' },
     { id:'cuerpo',   nombre:'ARMÁ EL CUERPO',  emoji:'🧍', desc:'CADA PARTE EN SU LUGAR' },
-    { id:'reciclar', nombre:'A RECICLAR',      emoji:'♻️', desc:'CADA COSA EN SU TACHO' } ],
+    { id:'reciclar', nombre:'A RECICLAR',      emoji:'♻️', desc:'CADA COSA EN SU TACHO' },
+    { id:'sentidos', nombre:'LOS 5 SENTIDOS',  emoji:'👀', desc:'¿QUÉ SENTIDO USÁS?' },
+    { id:'ciclovida', nombre:'EL CICLO DE VIDA', emoji:'🌱', desc:'ORDENÁ LOS PASOS' },
+    { id:'estadotiempo', nombre:'EL ESTADO DEL TIEMPO', emoji:'🌦️', desc:'¿QUÉ TE PONÉS?' },
+    { id:'familia',  nombre:'MI FAMILIA',      emoji:'👨‍👩‍👧', desc:'ESCUCHÁ Y TOCÁ' },
+    { id:'crias',    nombre:'CRÍAS DE ANIMALES', emoji:'🐣', desc:'¿CÓMO SE LLAMA LA CRÍA?' },
+    { id:'diferenciasciencia', nombre:'ENCONTRÁ LAS DIFERENCIAS', emoji:'🔍', desc:'¿QUÉ CAMBIÓ?' } ],
   colores: [
     { id:'color',    nombre:'TOCÁ EL COLOR',   emoji:'🌈', desc:'ESCUCHÁ Y TOCÁ' },
     { id:'formas',   nombre:'LAS FORMAS',      emoji:'⭐', desc:'CADA UNA EN SU HUECO' },
     { id:'mezclar',  nombre:'MEZCLÁ COLORES',  emoji:'🎨', desc:'AZUL + AMARILLO = ?' },
-    { id:'pintar',   nombre:'PINTÁ EL DIBUJO', emoji:'🖌️', desc:'ELEGÍ COLOR Y TOCÁ' } ],
+    { id:'pintar',   nombre:'PINTÁ EL DIBUJO', emoji:'🖌️', desc:'ELEGÍ COLOR Y TOCÁ' },
+    { id:'sombra',   nombre:'ADIVINÁ LA SOMBRA', emoji:'🌑', desc:'¿CUÁL HACE JUEGO?' },
+    { id:'clasifgeo',nombre:'CLASIFICADOR GEOMÉTRICO', emoji:'📐', desc:'CADA FORMA A SU CAJA' },
+    { id:'detformas',nombre:'DETECTIVE DE FORMAS', emoji:'🕵️', desc:'¿A QUÉ FORMA SE PARECE?' },
+    { id:'colorpatron', nombre:'EL COLLAR DE COLORES', emoji:'📿', desc:'SEGUÍ EL PATRÓN' },
+    { id:'formagrande', nombre:'GRANDE O CHICA',   emoji:'📏', desc:'¿CUÁL ES MÁS GRANDE?' },
+    { id:'colorespri',  nombre:'COLORES PRIMARIOS', emoji:'🎨', desc:'¿ES PRIMARIO?' } ],
   caligrafia: [
     { id:'letras',   nombre:'LAS LETRAS',      emoji:'🔤', desc:'TRAZÁ DE LA A A LA Z' },
     { id:'numeros',  nombre:'LOS NÚMEROS',     emoji:'✏️', desc:'TRAZÁ DEL 0 AL 9' },
     { id:'trazos',   nombre:'PRIMEROS TRAZOS', emoji:'〰️', desc:'DESDE LOS 4 AÑOS' },
-    { id:'palabras', nombre:'ESCRIBÍ PALABRAS',  emoji:'📝', desc:'TRAZÁ PALABRAS COMPLETAS' } ],
+    { id:'palabras', nombre:'ESCRIBÍ PALABRAS',  emoji:'📝', desc:'TRAZÁ PALABRAS COMPLETAS' },
+    { id:'minombre', nombre:'TRAZÁ TU NOMBRE', emoji:'⭐', desc:'LETRA POR LETRA' },
+    { id:'unirpuntos', nombre:'UNIR PUNTOS POR FORMA', emoji:'⭐', desc:'ESTRELLA, CUADRADO, TRIÁNGULO' },
+    { id:'laberintotrazo', nombre:'LABERINTOS DE TRAZO', emoji:'〜', desc:'SEGUÍ EL PASILLO' },
+    { id:'dibujoasistido', nombre:'DIBUJO LIBRE ASISTIDO', emoji:'🖍️', desc:'CON GUÍA DE FONDO' },
+    { id:'montescal', nombre:'MONTAÑAS Y ESCALERAS', emoji:'⛰️', desc:'TRAZOS EN ZIGZAG' },
+    { id:'olascarac', nombre:'OLAS Y CARACOLES', emoji:'🌊', desc:'CURVAS Y ESPIRALES' } ],
   minijuegos: [
     { id:'pizarra',  nombre:'PIZARRA MÁGICA',  emoji:'🖍️', desc:'DIBUJÁ LIBREMENTE' },
     { id:'animal',   nombre:'BUSCÁ EL ANIMAL', emoji:'🐵', desc:'ENCONTRÁ EL QUE TE DIGO' },
     { id:'intruso',  nombre:'ENCONTRÁ EL INTRUSO', emoji:'🕵️', desc:'¿CUÁL NO PERTENECE?' },
-    { id:'stickers', nombre:'PEGÁ LOS STICKERS', emoji:'🎈', desc:'DECORÁ LA ESCENA' } ]
+    { id:'stickers', nombre:'PEGÁ LOS STICKERS', emoji:'🎈', desc:'DECORÁ LA ESCENA' },
+    { id:'xilofono', nombre:'XILÓFONO',        emoji:'🎹', desc:'LIBRE O SIMÓN DICE' } ]
 };
 
 /* ==================================================================
@@ -1852,6 +1896,123 @@ const DIBUJOS_PINTAR = [
       <circle cx="150" cy="95" r="14"/>` }
 ];
 
+/* ==================================================================
+   DATOS DE LA AMPLIACIÓN A 10 JUEGOS POR BLOQUE
+   ================================================================== */
+
+/* ---------- 📚 LECTOESCRITURA: días, meses, rimas ---------- */
+const DIAS_SEMANA = ['LUNES','MARTES','MIÉRCOLES','JUEVES','VIERNES','SÁBADO','DOMINGO'];
+const MESES_ESTACION = [
+  { mes:'ENERO',      estacion:'VERANO'    }, { mes:'FEBRERO',   estacion:'VERANO'    },
+  { mes:'MARZO',      estacion:'OTOÑO'     }, { mes:'ABRIL',     estacion:'OTOÑO'     },
+  { mes:'MAYO',       estacion:'OTOÑO'     }, { mes:'JUNIO',     estacion:'INVIERNO'  },
+  { mes:'JULIO',      estacion:'INVIERNO'  }, { mes:'AGOSTO',    estacion:'INVIERNO'  },
+  { mes:'SEPTIEMBRE', estacion:'PRIMAVERA' }, { mes:'OCTUBRE',   estacion:'PRIMAVERA' },
+  { mes:'NOVIEMBRE',  estacion:'PRIMAVERA' }, { mes:'DICIEMBRE', estacion:'VERANO'    }
+];
+const ESTACION_EMOJI = { VERANO:'☀️', OTOÑO:'🍂', INVIERNO:'❄️', PRIMAVERA:'🌸' };
+/* Pares que riman, usando solo palabras que ya tienen dibujo propio */
+const RIMAS = [
+  ['GATO','PATO'], ['SOL','CARACOL'], ['FLOR','COLOR'], ['PEZ','NUEZ'],
+  ['RATÓN','LEÓN'], ['LUNA','CUNA'], ['TREN','SARTÉN'], ['OSO','QUESO']
+];
+
+/* ---------- 🧩 LÓGICA: opuestos, parejas, clasificador, laberinto ---------- */
+const OPUESTOS = [
+  ['GRANDE','CHICO'], ['DÍA','NOCHE'], ['ARRIBA','ABAJO'], ['RÁPIDO','LENTO'],
+  ['LLENO','VACÍO'], ['LIMPIO','SUCIO'], ['FELIZ','TRISTE'], ['CALIENTE','FRÍO'],
+  ['GORDO','FLACO'], ['MUCHO','POCO']
+];
+/* Parejas por uso o relación, todas con dibujo propio (twemoji) */
+const PAREJAS_LOGICA = [
+  ['LLAVE','PUERTA'], ['TENEDOR','PLATO'], ['ZAPATO','MEDIA'], ['ABEJA','FLOR'],
+  ['VACA','LECHE'], ['GALLINA','HUEVO'], ['PARAGUAS','LLUVIA'], ['LÁPIZ','CUADERNO'],
+  ['CUCHARA','SOPA'], ['PEINE','PELO']
+];
+const CLASIFICADOR_LOGICA = [
+  { id:'juguetes', nombre:'JUGUETES', emoji:'🧸', color:'bg-rosa',
+    cosas:['PELOTA','MUÑECA','AUTO','TREN','BLOQUE','ROMPECABEZAS'] },
+  { id:'ropa',      nombre:'ROPA',    emoji:'👕', color:'bg-cielo',
+    cosas:['REMERA','PANTALÓN','GORRA','ZAPATILLA','MEDIA','BUFANDA'] }
+];
+/* Laberinto lógico: en cada bifurcación hay que tocar el camino del color
+   correcto para seguir avanzando hacia la meta. */
+const LABERINTO_LOGICO = [
+  { color:'ROJO',    hex:'#EF4444' }, { color:'AZUL',    hex:'#2563EB' },
+  { color:'VERDE',   hex:'#22C55E' }, { color:'AMARILLO',hex:'#FACC15' }
+];
+
+/* ---------- 🌎 INGLÉS: vocabulario por tema ---------- */
+const INGLES_TEMAS = {
+  colores: [ {en:'RED',es:'ROJO'},{en:'BLUE',es:'AZUL'},{en:'YELLOW',es:'AMARILLO'},
+    {en:'GREEN',es:'VERDE'},{en:'PINK',es:'ROSA'},{en:'WHITE',es:'BLANCO'},
+    {en:'BLACK',es:'NEGRO'},{en:'ORANGE',es:'NARANJA'} ],
+  cuerpo: [ {en:'EYES',es:'OJOS'},{en:'NOSE',es:'NARIZ'},{en:'HANDS',es:'MANOS'},
+    {en:'EARS',es:'OREJA'},{en:'MOUTH',es:'BOCA'},{en:'HAIR',es:'PELO'},{en:'FEET',es:'PIE'} ],
+  comida: [ {en:'APPLE',es:'MANZANA'},{en:'MILK',es:'LECHE'},{en:'BREAD',es:'PAN'},
+    {en:'WATER',es:'AGUA'},{en:'CHEESE',es:'QUESO'},{en:'JUICE',es:'JUGO'},{en:'EGG',es:'HUEVO'} ],
+  animales: [ {en:'DOG',es:'PERRO'},{en:'CAT',es:'GATO'},{en:'COW',es:'VACA'},
+    {en:'DUCK',es:'PATO'},{en:'HORSE',es:'CABALLO'},{en:'FISH',es:'PEZ'},{en:'BIRD',es:'PÁJARO'} ],
+  clima: [ {en:'SUNNY',es:'SOL'},{en:'RAINY',es:'LLUVIA'},{en:'WINDY',es:'VIENTO'},
+    {en:'CLOUDY',es:'NUBE'},{en:'SNOWY',es:'NIEVE'} ],
+  tiempo: [ {en:'MONDAY',es:'LUNES'},{en:'TUESDAY',es:'MARTES'},{en:'WEDNESDAY',es:'MIÉRCOLES'},
+    {en:'THURSDAY',es:'JUEVES'},{en:'FRIDAY',es:'VIERNES'},{en:'JANUARY',es:'ENERO'},
+    {en:'JULY',es:'JULIO'},{en:'DECEMBER',es:'DICIEMBRE'} ]
+};
+const INGLES_TITULOS = {
+  colores:{ t:'COLORS', d:'TOCÁ Y ESCUCHÁ CADA COLOR' }, cuerpo:{ t:'BODY & SENSES', d:'TOCÁ CADA PARTE DEL CUERPO' },
+  comida:{ t:'FOOD & DRINKS', d:'ESCUCHÁ Y TOCÁ' }, animales:{ t:'ANIMALS', d:'ESCUCHÁ Y TOCÁ EL ANIMAL' },
+  clima:{ t:'WEATHER', d:'¿QUÉ CLIMA ES?' }, tiempo:{ t:'DAYS & MONTHS', d:'ESCUCHÁ Y TOCÁ' }
+};
+
+/* ---------- 🔢 MATEMÁTICA: legos, tangram, comparar ---------- */
+const FIGURAS_TANGRAM = [
+  { id:'casa', nombre:'LA CASA', piezas:[
+    {f:'triangulo', x:30, y:8,  s:40}, {f:'cuadrado', x:20, y:45, s:60} ] },
+  { id:'barco', nombre:'EL BARCO', piezas:[
+    {f:'triangulo', x:45, y:10, s:34}, {f:'rectangulo', x:10, y:55, s:80} ] },
+  { id:'cohete', nombre:'EL COHETE', piezas:[
+    {f:'triangulo', x:30, y:5,  s:40}, {f:'rectangulo', x:32, y:40, s:36}, {f:'triangulo', x:30, y:75, s:40} ] }
+];
+
+/* ---------- 🔬 CIENCIAS: sentidos, ciclo de vida, familia, crías ---------- */
+const CINCO_SENTIDOS = [
+  { sentido:'VISTA',  emoji:'👀', usa:'OJOS' }, { sentido:'OÍDO',   emoji:'👂', usa:'OREJA' },
+  { sentido:'OLFATO', emoji:'👃', usa:'NARIZ' }, { sentido:'GUSTO',  emoji:'👅', usa:'LENGUA' },
+  { sentido:'TACTO',  emoji:'✋', usa:'MANO' }
+];
+const CICLOS_VIDA = [
+  { id:'planta', nombre:'LA PLANTA',  pasos:['SEMILLA','PLANTA','FLOR'] },
+  { id:'pollo',  nombre:'LA GALLINA', pasos:['HUEVO','POLLITO','GALLINA'] },
+  { id:'persona',nombre:'LA PERSONA', pasos:['BEBÉ','NIÑO','ADOLESCENTE'] }
+];
+const CLIMA_ROPA = [
+  { clima:'CALOR', emoji:'☀️', ropa:'SHORT' }, { clima:'FRÍO', emoji:'❄️', ropa:'CAMPERA' },
+  { clima:'LLUVIA', emoji:'🌧️', ropa:'PARAGUAS' }
+];
+/* Familia: palabras GENÉRICAS de parentesco con dibujos genéricos ya
+   existentes (mamá/papá/abuela/abuelo/hermano/tío...). A propósito NO usa
+   nombres propios de ninguna familia en particular: así funciona igual
+   para cualquier chico que juegue, sea quien sea. */
+const FAMILIA_ROLES = ['MAMÁ','PAPÁ','ABUELA','ABUELO','HERMANO','HERMANA','TÍO','TÍA'];
+const CRIAS_ANIMALES = [
+  { grande:'VACA', cria:'CRÍA DE VACA', emojiCria:'🐄' }, { grande:'GALLINA', cria:'POLLITO' },
+  { grande:'PERRO', cria:'CACHORRO' }, { grande:'GATO', cria:'GATITO' },
+  { grande:'OVEJA', cria:'CORDERO' }
+];
+
+/* ---------- 🎨 COLORES Y FORMAS: sombra, geometría, detective ---------- */
+/* Objetos para "adivina la sombra": todos con imagen propia, para que la
+   silueta (mismo PNG con filtro a negro) se note bien nítida. */
+const SOMBRA_OBJETOS = ['GATO','PERRO','PATO','PEZ','MARIPOSA','ÁRBOL','FLOR','AUTO','TREN','PIZZA',
+  'MANZANA','CASA','ESTRELLA','LUNA','GLOBO'];
+const DETECTIVE_FORMAS = [
+  { objeto:'PIZZA',   forma:'triangulo' }, { objeto:'VENTANA', forma:'cuadrado' },
+  { objeto:'PLATO',   forma:'circulo'  }, { objeto:'LIBRO',   forma:'rectangulo' },
+  { objeto:'ESTRELLA',forma:'estrella' }, { objeto:'ANILLO',  forma:'circulo' },
+  { objeto:'HUEVO',   forma:'ovalo'    }
+];
+
 /* Trazos: cada letra, número o trazo es una lista de tramos [desde, hasta] en 220x220.
    Los tramos que arrancan donde terminó el anterior se dibujan como un solo
    movimiento (un solo numerito), así la O tiene 1 punto de partida y no 4.     */
@@ -1923,13 +2084,32 @@ Object.assign(TRAZOS, {
   'OLA':      curva(t => [28 + t*164, 110 + 48 * Math.sin(t * Math.PI * 3)]),
   'CARACOL':  curva(t => [110 + (14 + t*78) * Math.cos(t * Math.PI * 3.4),
                           110 + (14 + t*78) * Math.sin(t * Math.PI * 3.4)], 40),
-  'CÍRCULO':  curva(t => [110 + 78 * Math.sin(t * 2 * Math.PI), 110 - 78 * Math.cos(t * 2 * Math.PI)], 30)
+  'CÍRCULO':  curva(t => [110 + 78 * Math.sin(t * 2 * Math.PI), 110 - 78 * Math.cos(t * 2 * Math.PI)], 30),
+
+  /* Formas para "UNIR PUNTOS POR FORMA": el mismo motor de trazo, ahora
+     siguiendo el contorno de una figura en vez de una letra. */
+  'CUADRADO':  [[[30,30],[190,30]],[[190,30],[190,190]],[[190,190],[30,190]],[[30,190],[30,30]]],
+  'TRIÁNGULO': [[[110,25],[190,185]],[[190,185],[30,185]],[[30,185],[110,25]]],
+  'ESTRELLA':  [[[110,27],[132,91]],[[132,91],[200,91]],[[200,91],[144,131]],[[144,131],[166,195]],
+                [[166,195],[110,155]],[[110,155],[54,195]],[[54,195],[76,131]],[[76,131],[20,91]],
+                [[20,91],[88,91]],[[88,91],[110,27]]],
+
+  /* "Laberintos de trazo": un camino con varias vueltas para practicar
+     motricidad fina siguiendo un pasillo en vez de una línea recta. */
+  'LABERINTO1': [[[20,195],[20,150]],[[20,150],[70,150]],[[70,150],[70,105]],[[70,105],[130,105]],
+                 [[130,105],[130,60]],[[130,60],[190,60]],[[190,60],[190,20]]],
+  'LABERINTO2': [[[195,30],[145,30]],[[145,30],[145,80]],[[145,80],[75,80]],[[75,80],[75,130]],
+                 [[75,130],[195,130]],[[195,130],[195,180]],[[195,180],[25,180]]]
 });
 
 const LETRAS_DEMO  = 'ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('');
 const NUMEROS_DEMO = ['0','1','2','3','4','5','6','7','8','9'];
 const TRAZOS_PREVIOS = ['LÍNEA','PALITOS','CRUZ','PARALELAS','ZIGZAG','GRANDE Y CHICA',
                          'MONTAÑA','ESCALERA','OLA','CÍRCULO','CARACOL'];
+const FORMAS_TRAZO      = ['CUADRADO','TRIÁNGULO','ESTRELLA'];
+const LABERINTOS_TRAZO  = ['LABERINTO1','LABERINTO2'];
+const MONTANIAS_ESCALERAS = ['MONTAÑA','ESCALERA'];
+const OLAS_CARACOLES     = ['OLA','CÍRCULO','CARACOL'];
 
 /* Nombre de cada letra ESCRITO como palabra (no el carácter solo).
    Si le pedimos al sintetizador de voz que lea el carácter "B" aislado,
@@ -1962,7 +2142,10 @@ const dibujo = (p, c = 'w-16 h-16') => Img.html(p, c);
    PANTALLA 1 · ELEGIR QUIÉN JUEGA
    ================================================================== */
 function pantallaPerfil(){
-  const ultimo = Perfil.actual() || '';
+  /* El campo SIEMPRE arranca vacío: no hay que precargar el último nombre
+     que jugó en este dispositivo (si Bruno jugó ayer, hoy no tiene que
+     aparecer "BRUNO" ya escrito cuando juega Lorenzo). Cada chico escribe
+     o toca su propio nombre en cada partida. */
   const d = document.createElement('div');
   d.id = 'bb-perfil-pantalla';
   d.className = 'fixed inset-0 z-[9999] bg-gradient-to-b from-cielo via-crema to-rosa ' +
@@ -1975,7 +2158,7 @@ function pantallaPerfil(){
 
       <div id="bb-cara" class="text-7xl my-2">🧒</div>
 
-      <input id="bb-nombre" value="${ultimo}" maxlength="18"
+      <input id="bb-nombre" value="" maxlength="18"
         autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="go"
         placeholder="TOCÁ LAS LETRAS ↓"
         class="w-full rounded-3xl border-4 border-white p-4 font-titulo font-extrabold
@@ -4144,6 +4327,1058 @@ function jStickers(){
 }
 
 /* ==================================================================
+   AMPLIACIÓN A 10 JUEGOS POR BLOQUE
+   ================================================================== */
+
+/* ---------- 📚 LECTOESCRITURA ---------- */
+function jLetraInicial(){
+  const p = alAzar(BANCO.PALABRAS.filter(x => Img.tiene(x) && !x.texto.includes(' ') && x.cat !== 'nombres' && x.plano.length >= 3));
+  const correcta = p.plano[0];
+  const otras = tomar('ABCDEFGHIJKLMNÑOPQRSTUVWXYZ'.split('').filter(l => l !== correcta), 2);
+  const opciones = mezclar([correcta, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿CON QUÉ LETRA EMPIEZA?','MIRÁ EL DIBUJO Y TOCÁ LA LETRA')}
+      <div class="my-4">${UI.escena(dibujo(p,'w-28 h-28 sm:w-36 sm:h-36'),'#DBEAFE')}</div>
+      <div class="flex justify-center gap-4">
+        ${opciones.map(l => `<button class="opl btn3d bg-white border-4 border-cielo rounded-3xl
+          w-16 h-16 sm:w-20 sm:h-20 font-titulo font-extrabold text-3xl" data-ok="${l===correcta}">${l}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar(p.texto);
+  vista.querySelectorAll('.opl').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(p.texto + ' EMPIEZA CON ' + correcta, jLetraInicial);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jLetraInicial, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+function jSilabaFaltante(){
+  const candidatos = BANCO.PALABRAS.filter(x => Img.tiene(x) && !x.texto.includes(' ') && x.cat !== 'nombres' && Silabas.separar(x.texto).length >= 2);
+  const p = alAzar(candidatos);
+  const sil = Silabas.separar(p.texto);
+  const faltante = sil[sil.length - 1];
+  const visible = sil.slice(0, -1).join('') + ' ' + '_'.repeat(faltante.length);
+  const otras = tomar(candidatos.filter(x => x.plano !== p.plano)
+    .map(x => { const s = Silabas.separar(x.texto); return s[s.length - 1]; })
+    .filter(s => s !== faltante), 2);
+  const opciones = mezclar([faltante, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('COMPLETÁ LA SÍLABA','ELEGÍ LA SÍLABA QUE FALTA')}
+      <div class="my-3">${UI.escena(dibujo(p,'w-24 h-24 sm:w-28 sm:h-28'),'#FEF3C7')}</div>
+      <div class="font-titulo font-extrabold text-3xl sm:text-4xl tracking-widest my-3">${visible}</div>
+      <div class="flex justify-center gap-3">
+        ${opciones.map(s => `<button class="osf btn3d bg-white border-4 border-amarillo rounded-3xl
+          px-5 py-3 font-titulo font-extrabold text-2xl" data-ok="${s===faltante}">${s}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar(p.texto);
+  vista.querySelectorAll('.osf').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(p.texto, jSilabaFaltante);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jSilabaFaltante, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+function jAhorcado(){
+  const p = alAzar(BANCO.PALABRAS.filter(x => Img.tiene(x) && !x.texto.includes(' ') &&
+    x.cat !== 'nombres' && x.plano.length >= 3 && x.plano.length <= 7));
+  const letras = [...new Set(p.plano.split(''))];
+  const adivinadas = new Set();
+  let globos = 3;
+
+  function pintar(){
+    vista.innerHTML = `
+      <div class="text-center">
+        ${UI.consigna('ADIVINÁ LA PALABRA','TOCÁ LAS LETRAS')}
+        <div class="my-3">${UI.escena(dibujo(p,'w-24 h-24 sm:w-28 sm:h-28'),'#FCE7F3')}</div>
+        <div class="text-2xl mb-2">${'🎈'.repeat(Math.max(globos,0))}${'💥'.repeat(3-Math.max(globos,0))}</div>
+        <div class="font-titulo font-extrabold text-3xl sm:text-4xl tracking-widest my-3">
+          ${p.plano.split('').map(l => adivinadas.has(l) ? l : '_').join(' ')}</div>
+        <div id="teclAh" class="flex flex-wrap justify-center gap-1 max-w-md mx-auto"></div>
+        ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+      </div>`;
+    vista.querySelector('#teclAh').innerHTML = LETRAS_DEMO.map(l => `<button data-l="${l}"
+      class="btn3d rounded-2xl w-9 h-9 sm:w-10 sm:h-10 font-titulo font-extrabold text-sm
+      ${adivinadas.has(l) ? (letras.includes(l) ? 'bg-verde' : 'bg-rosa') + ' pointer-events-none opacity-60' : 'bg-white border-2 border-tinta/10'}">${l}</button>`).join('');
+    vista.querySelectorAll('#teclAh [data-l]').forEach(b => b.addEventListener('click', tocarLetra));
+    UI.conectarBarra({ escuchar:() => Voz.hablar(p.texto), siguiente:jAhorcado, menu:volverAlMenu });
+  }
+  function tocarLetra(e){
+    const l = e.currentTarget.dataset.l;
+    if (adivinadas.has(l)) return;
+    adivinadas.add(l);
+    if (letras.includes(l)){
+      Sonido.ok();
+      if (letras.every(x => adivinadas.has(x))){ pintar(); Puntaje.sumar(3); UI.festejar(p.texto, jAhorcado); return; }
+    } else {
+      globos--; Sonido.error();
+      if (globos <= 0){ p.plano.split('').forEach(x => adivinadas.add(x)); pintar(); Voz.hablar('era ' + p.texto); return; }
+    }
+    pintar();
+  }
+  pintar();
+  Voz.hablar('adiviná la palabra');
+}
+
+function jTrenDias(){
+  const i = 1 + Math.floor(Math.random() * (DIAS_SEMANA.length - 2));
+  const falta = DIAS_SEMANA[i];
+  const opciones = mezclar([falta, ...tomar(DIAS_SEMANA.filter(d => d !== falta), 2)]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('EL TREN DE LOS DÍAS','¿QUÉ DÍA FALTA EN EL TREN?')}
+      <div class="flex flex-wrap justify-center items-center gap-1.5 my-5">
+        ${DIAS_SEMANA.map((d, k) => k === i
+          ? `<div class="w-16 sm:w-20 h-14 rounded-2xl bg-rosa/30 border-4 border-dashed border-rosa
+               flex items-center justify-center font-titulo font-extrabold text-2xl">🚃❓</div>`
+          : `<div class="w-16 sm:w-20 h-14 rounded-2xl bg-cielo border-2 border-white
+               flex items-center justify-center font-titulo font-extrabold text-[10px] sm:text-xs px-1">🚃 ${d}</div>`
+        ).join('')}
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(d => `<button class="otd btn3d bg-white border-4 border-rosa rounded-3xl px-4 py-3
+          font-titulo font-extrabold" data-ok="${d===falta}">${d}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.otd').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(falta, jTrenDias);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ siguiente:jTrenDias, menu:volverAlMenu });
+  Voz.hablar('qué día falta en el tren');
+}
+
+function jCalendarioMeses(){
+  const m = alAzar(MESES_ESTACION);
+  const opciones = mezclar([m.estacion, ...tomar(['VERANO','OTOÑO','INVIERNO','PRIMAVERA'].filter(e => e !== m.estacion), 2)]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('LOS MESES Y LAS ESTACIONES','¿EN QUÉ ESTACIÓN ESTÁ ESTE MES?')}
+      <div class="bg-crema rounded-3xl border-4 border-cielo/60 p-5 my-4">
+        <div class="font-titulo font-extrabold text-3xl sm:text-4xl">${m.mes}</div>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(e => `<button class="ome btn3d bg-white border-4 border-cielo rounded-3xl px-4 py-3
+          font-titulo font-extrabold" data-ok="${e===m.estacion}">${ESTACION_EMOJI[e]} ${e}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.ome').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(m.mes + ' ES ' + m.estacion, jCalendarioMeses);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar(m.mes), siguiente:jCalendarioMeses, menu:volverAlMenu });
+  Voz.hablar(m.mes);
+}
+
+function jRima(){
+  const par = alAzar(RIMAS);
+  const objetivo = BANCO.buscar(par[0]);
+  const correcta = BANCO.buscar(par[1]);
+  const otras = tomar(RIMAS.filter(r => r !== par).map(r => BANCO.buscar(r[1])).filter(Boolean), 2);
+  const opciones = mezclar([correcta, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿QUÉ PALABRA RIMA?','MIRÁ EL DIBUJO Y TOCÁ LA QUE RIMA')}
+      <div class="my-3">${UI.escena(dibujo(objetivo,'w-24 h-24 sm:w-28 sm:h-28'),'#F0FDF4')}</div>
+      <p class="font-titulo font-extrabold text-2xl mb-3">${objetivo.texto}</p>
+      <div class="grid grid-cols-3 gap-3 max-w-md mx-auto">
+        ${opciones.map(p => `<button class="orm btn3d bg-white border-4 border-verde rounded-3xl p-2
+          flex items-center justify-center" data-ok="${p.plano===correcta.plano}">${dibujo(p,'w-16 h-16')}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar('qué palabra rima con ' + objetivo.texto);
+  vista.querySelectorAll('.orm').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(objetivo.texto + ' RIMA CON ' + correcta.texto, jRima);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jRima, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+/* ---------- 🧩 LÓGICA ---------- */
+function jOpuestos(){
+  const par = alAzar(OPUESTOS);
+  const lado = Math.random() < 0.5 ? 0 : 1;
+  const palabra = par[lado], correcta = par[1-lado];
+  const otras = tomar(OPUESTOS.filter(o => o !== par).map(o => alAzar(o)).filter(w => w !== correcta), 2);
+  const opciones = mezclar([correcta, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('OPUESTOS','¿CUÁL ES LO CONTRARIO?')}
+      <div class="bg-crema rounded-3xl border-4 border-rosa/60 p-5 my-4">
+        <div class="font-titulo font-extrabold text-3xl sm:text-4xl">${palabra}</div>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(o => `<button class="oop btn3d bg-white border-4 border-rosa rounded-3xl px-5 py-3
+          font-titulo font-extrabold text-xl" data-ok="${o===correcta}">${o}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.oop').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('LO CONTRARIO DE ' + palabra + ' ES ' + correcta, jOpuestos);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar('cuál es lo contrario de ' + palabra), siguiente:jOpuestos, menu:volverAlMenu });
+  Voz.hablar('cuál es lo contrario de ' + palabra);
+}
+
+function jParejasLogica(){
+  const tres = tomar(PAREJAS_LOGICA, 3).map(([a,b]) => ({ a:BANCO.buscar(a), b:BANCO.buscar(b) })).filter(x => x.a && x.b);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿QUÉ VA CON QUÉ?','ARRASTRÁ CADA COSA A SU PAREJA')}
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${mezclar(tres.map(x => x.a)).map(p => `<div class="fpl btn3d bg-white border-4 border-lila
+          rounded-3xl p-2" data-val="${p.plano}">${dibujo(p,'w-14 h-14 sm:w-16 sm:h-16')}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-3 gap-2 max-w-lg mx-auto">
+        ${tres.map(x => `<div class="zpl rounded-3xl bg-lila/25 border-4 border-dashed border-lila p-2
+          min-h-[6rem] flex flex-col items-center justify-center" data-val="${x.a.plano}">
+          ${dibujo(x.b,'w-12 h-12 sm:w-14 sm:h-14')}
+          <div class="destino text-xs font-titulo font-extrabold mt-1"></div>
+        </div>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRAS ➡️' })}
+    </div>`;
+  let ok = 0;
+  vista.querySelectorAll('.zpl').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fpl').forEach(f => Drag.ficha(f));
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zpl') || z.dataset.ok) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('.destino').textContent = f.dataset.val;
+      z.dataset.ok = 1; z.classList.add('bg-verde','pop');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(2);
+      if (++ok === tres.length) setTimeout(() => UI.festejar('¡MUY BIEN!', jParejasLogica), 600);
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jParejasLogica, menu:volverAlMenu });
+  Voz.hablar('arrastrá cada cosa a su pareja');
+}
+
+const ESCENAS_DIFERENCIAS = [
+  { base:['☀️','☁️','🌳','🏠','🌸','⭐'], cambios:[1,3,5] },
+  { base:['🐦','🦋','🌼','🍄','🐌','🍂'], cambios:[0,2,4] },
+  { base:['⚽','🚗','🎈','🧸','📚','🎨'], cambios:[1,2,4] }
+];
+const REEMPLAZOS_DIFERENCIAS = ['🌈','🦄','🍭','👻','🎁','🐢','🦖','🍕'];
+function jDiferencias(){
+  const set = alAzar(ESCENAS_DIFERENCIAS);
+  const b = [...set.base];
+  set.cambios.forEach(idx => { b[idx] = alAzar(REEMPLAZOS_DIFERENCIAS.filter(r => !set.base.includes(r))); });
+  const encontradas = new Set();
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('ENCONTRÁ LAS DIFERENCIAS','TOCÁ EN LA SEGUNDA FILA LO QUE CAMBIÓ')}
+      <div class="flex justify-center gap-1 my-2 flex-wrap">
+        ${set.base.map(e => `<div class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-cielo/20 border-2
+          border-white flex items-center justify-center text-2xl sm:text-3xl">${e}</div>`).join('')}
+      </div>
+      <div class="flex justify-center gap-1 my-2 flex-wrap">
+        ${b.map((e, i) => `<button data-i="${i}" class="difb w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-amarillo/20
+          border-2 border-white flex items-center justify-center text-2xl sm:text-3xl">${e}</button>`).join('')}
+      </div>
+      <p class="font-titulo font-extrabold mt-2">ENCONTRADAS: <span id="contD">0</span> DE ${set.cambios.length}</p>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+
+  vista.querySelectorAll('.difb').forEach(btn => btn.addEventListener('click', () => {
+    const i = +btn.dataset.i;
+    if (encontradas.has(i)) return;
+    if (set.cambios.includes(i)){
+      encontradas.add(i);
+      btn.classList.add('pop','ring-4','ring-verde');
+      Sonido.ok(); Puntaje.sumar(2);
+      vista.querySelector('#contD').textContent = encontradas.size;
+      if (encontradas.size === set.cambios.length) UI.festejar('¡ENCONTRASTE TODAS!', jDiferencias);
+    } else UI.error(btn);
+  }));
+  UI.conectarBarra({ siguiente:jDiferencias, menu:volverAlMenu });
+  Voz.hablar('encontrá lo que cambió entre las dos filas');
+}
+
+function jClasificadorLogica(){
+  const items = CLASIFICADOR_LOGICA.flatMap(c =>
+    tomar(c.cosas, 3).map(w => ({ p:BANCO.buscar(w), cat:c.id })).filter(x => x.p));
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('CLASIFICADOR','ARRASTRÁ CADA COSA A SU CAJA')}
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${mezclar([...items]).map(i => `<div class="fcl btn3d bg-white border-4 border-cielo
+          rounded-3xl p-2" data-val="${i.cat}">${dibujo(i.p,'w-12 h-12 sm:w-14 sm:h-14')}</div>`).join('')}
+      </div>
+      <div class="grid grid-cols-2 gap-3 max-w-md mx-auto">
+        ${CLASIFICADOR_LOGICA.map(c => `<div class="zcl rounded-3xl ${c.color} border-4 border-dashed
+          border-tinta/20 p-2 min-h-[9rem]" data-val="${c.id}">
+          <div class="text-4xl">${c.emoji}</div>
+          <div class="font-titulo font-extrabold text-sm">${c.nombre}</div>
+          <div class="dentro flex flex-wrap justify-center gap-1 mt-1"></div>
+        </div>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTROS ➡️' })}
+    </div>`;
+  let ok = 0;
+  vista.querySelectorAll('.zcl').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.fcl').forEach(f => Drag.ficha(f));
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zcl')) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('.dentro').insertAdjacentHTML('beforeend',
+        `<span class="pop">${f.innerHTML.replace(/w-12 h-12 sm:w-14 sm:h-14/, 'w-8 h-8')}</span>`);
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(1);
+      if (++ok === items.length){ Puntaje.sumar(2); UI.festejar('¡TODO CLASIFICADO!', jClasificadorLogica); }
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jClasificadorLogica, menu:volverAlMenu });
+  Voz.hablar('arrastrá cada cosa a su caja');
+}
+
+function jLaberintoLogico(){
+  const camino = mezclar(LABERINTO_LOGICO);
+  let paso = 0;
+
+  function pintar(){
+    const objetivo = camino[paso];
+    vista.innerHTML = `
+      <div class="text-center">
+        ${UI.consigna('LABERINTO LÓGICO','TOCÁ EL CAMINO DEL COLOR QUE TE DIGO PARA SEGUIR')}
+        <div class="flex justify-center gap-1.5 my-3">
+          ${camino.map((c, k) => `<div class="w-8 h-8 rounded-full border-4
+            ${k < paso ? 'border-verde' : k === paso ? 'border-tinta' : 'border-tinta/20'}"
+            style="background:${c.hex}"></div>`).join('')}
+        </div>
+        <p class="font-titulo font-extrabold text-xl my-3">🚶 TOCÁ EL CAMINO ${objetivo.color}</p>
+        <div class="flex justify-center gap-4">
+          ${mezclar([...LABERINTO_LOGICO]).map(c => `<button class="olb btn3d rounded-3xl w-16 h-16 sm:w-20 sm:h-20"
+            style="background:${c.hex}" data-ok="${c.color===objetivo.color}"></button>`).join('')}
+        </div>
+        ${UI.barra({ escuchar:false, textoSiguiente:'OTRO CAMINO ➡️' })}
+      </div>`;
+    vista.querySelectorAll('.olb').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.ok === 'true'){
+        Sonido.ok(); Puntaje.sumar(2); paso++;
+        if (paso >= camino.length) UI.festejar('¡LLEGASTE A LA META!', jLaberintoLogico);
+        else pintar();
+      } else UI.error(b);
+    }));
+    UI.conectarBarra({ siguiente:jLaberintoLogico, menu:volverAlMenu });
+  }
+  pintar();
+  Voz.hablar('tocá el camino del color que te digo para llegar a la meta');
+}
+
+/* ---------- 🌎 INGLÉS: un mismo juego, distintos temas ---------- */
+function jInglesTema(tema){
+  const lista = INGLES_TEMAS[tema];
+  const info = INGLES_TITULOS[tema];
+  const correcta = alAzar(lista);
+  const opciones = mezclar([correcta, ...tomar(lista.filter(x => x.en !== correcta.en), Math.min(2, lista.length - 1))]);
+  const esColor = tema === 'colores';
+  const esTexto = tema === 'tiempo';
+
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna(info.t, info.d)}
+      <button id="bRepT" class="btn3d bg-amarillo rounded-3xl px-8 py-6 my-5
+        font-titulo font-extrabold text-2xl sm:text-3xl">🔊 ${correcta.en}</button>
+      <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto">
+        ${opciones.map(o => {
+          const p = BANCO.buscar(o.es);
+          return `<button class="opit ${esTexto?'':'aspect-square'} rounded-3xl bg-cielo btn3d flex items-center
+            justify-center p-3 ${esTexto?'font-titulo font-extrabold text-lg':''}" data-ok="${o.en===correcta.en}" data-en="${o.en}">
+            ${esTexto ? o.es : (esColor ? Img.html(p,'w-full h-full',{comoColor:true}) : dibujo(p,'w-full h-full'))}</button>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'NEXT ➡️' })}
+    </div>`;
+
+  const decir = () => Voz.hablar(correcta.en, 'en');
+  vista.querySelector('#bRepT').addEventListener('click', decir);
+  vista.querySelectorAll('.opit').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.remove('bg-cielo'); b.classList.add('bg-verde','pop');
+      Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(correcta.en + ' = ' + correcta.es, () => jInglesTema(tema));
+    } else { UI.error(b); Voz.hablar(b.dataset.en, 'en'); }
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:() => jInglesTema(tema), menu:volverAlMenu });
+  setTimeout(decir, 500);
+}
+
+/* ---------- 🔢 MATEMÁTICA ---------- */
+function jBloquesLego(){
+  const n = 1 + Math.floor(Math.random() * 9);
+  const ops = mezclar([n, ...tomar([1,2,3,4,5,6,7,8,9,10].filter(x => x !== n), 2)]);
+  const COLORES_LEGO = ['#EF4444','#2563EB','#FACC15','#22C55E','#8B5CF6'];
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('LA TORRE DE BLOQUES','CONTÁ LOS BLOQUES Y TOCÁ EL NÚMERO')}
+      <div class="flex flex-col items-center gap-1 my-4">
+        ${Array.from({length:n}, (_, i) => `<div class="w-16 h-8 sm:w-20 sm:h-9 rounded-md border-2 border-white pop"
+          style="background:${COLORES_LEGO[i % COLORES_LEGO.length]}"></div>`).join('')}
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${ops.map(o => `<button class="obl btn3d bg-white border-4 border-verde rounded-3xl w-16 h-16
+          font-titulo font-extrabold text-3xl" data-ok="${o===n}">${o}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA TORRE ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.obl').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('SON ' + n, jBloquesLego);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar('contá los bloques de la torre'), siguiente:jBloquesLego, menu:volverAlMenu });
+  Voz.hablar('contá los bloques de la torre');
+}
+
+function jSumaConstructora(){
+  const a = 1 + Math.floor(Math.random() * 4), b = 1 + Math.floor(Math.random() * 4);
+  const total = a + b;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('SUMA CONSTRUCTORA','TOCÁ LOS DOS BLOQUES QUE ARMAN EL PUENTE')}
+      <p class="font-titulo font-extrabold text-2xl my-2">¿QUÉ DOS BLOQUES SUMAN ${total}?</p>
+      <div class="flex flex-wrap justify-center gap-3 my-4">
+        ${mezclar([a, b, ...tomar([1,2,3,4,5].filter(x => x!==a && x!==b), 2)]).map(v => `<button
+          class="obc btn3d bg-amarillo rounded-2xl px-4 py-3 font-titulo font-extrabold text-xl" data-v="${v}">
+          ${'🧱'.repeat(v)}<div class="text-sm">${v}</div></button>`).join('')}
+      </div>
+      <div id="puente" class="flex justify-center gap-2 min-h-[3rem] items-center font-titulo font-extrabold text-2xl"></div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA SUMA ➡️' })}
+    </div>`;
+  let elegidos = [];
+  vista.querySelectorAll('.obc').forEach(b => b.addEventListener('click', () => {
+    if (b.classList.contains('pointer-events-none')) return;
+    elegidos.push(+b.dataset.v);
+    b.classList.add('pointer-events-none','opacity-40');
+    vista.querySelector('#puente').textContent = elegidos.join(' + ') + (elegidos.length===2 ? ' = ' + elegidos.reduce((s,x)=>s+x,0) : '');
+    if (elegidos.length === 2){
+      if (elegidos.reduce((s,x)=>s+x,0) === total){
+        Sonido.ok(); Puntaje.sumar(3);
+        UI.festejar(a + ' + ' + b + ' = ' + total, jSumaConstructora);
+      } else {
+        UI.error(vista.querySelector('#puente'));
+        setTimeout(jSumaConstructora, 1200);
+      }
+    }
+  }));
+  UI.conectarBarra({ siguiente:jSumaConstructora, menu:volverAlMenu });
+  Voz.hablar('qué dos bloques suman ' + total);
+}
+
+function jTangram(){
+  const fig = alAzar(FIGURAS_TANGRAM);
+  let i = 0;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('TANGRAM: ' + fig.nombre, 'TOCÁ LAS FORMAS EN ORDEN PARA ARMARLA')}
+      <div class="relative w-56 h-56 sm:w-64 sm:h-64 mx-auto my-4 bg-crema rounded-3xl border-4 border-cielo/50">
+        ${fig.piezas.map((pz, k) => `<div id="pz${k}" class="absolute opacity-15" style="left:${pz.x}%;top:${pz.y}%;
+          width:${pz.s}%;height:${pz.s}%">
+          <svg viewBox="0 0 100 100" class="w-full h-full" fill="#334155">${FORMAS.find(x=>x.id===pz.f).svg}</svg>
+        </div>`).join('')}
+      </div>
+      <div class="flex justify-center gap-3">
+        ${mezclar([...new Set(fig.piezas.map(p=>p.f))]).map(f => `<button class="otg btn3d bg-white border-4
+          border-naranja rounded-2xl p-2 w-16 h-16" data-f="${f}">
+          <svg viewBox="0 0 100 100" fill="#FB923C">${FORMAS.find(x=>x.id===f).svg}</svg></button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA FIGURA ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.otg').forEach(b => b.addEventListener('click', () => {
+    if (i >= fig.piezas.length) return;
+    if (b.dataset.f === fig.piezas[i].f){
+      vista.querySelector('#pz' + i).classList.remove('opacity-15');
+      Sonido.ok(); Puntaje.sumar(1); i++;
+      if (i === fig.piezas.length){ Puntaje.sumar(2); UI.festejar('¡ARMASTE ' + fig.nombre + '!', jTangram); }
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ siguiente:jTangram, menu:volverAlMenu });
+  Voz.hablar('armá ' + fig.nombre + ' tocando las formas en orden');
+}
+
+function jMayorMenorIgual(){
+  const a = 1 + Math.floor(Math.random()*10), b = 1 + Math.floor(Math.random()*10);
+  const correcto = a > b ? '>' : a < b ? '<' : '=';
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('MAYOR, MENOR O IGUAL','TOCÁ EL SIGNO CORRECTO')}
+      <div class="flex items-center justify-center gap-4 my-5">
+        <div class="text-center"><div>${'🧱'.repeat(a)}</div><div class="font-titulo font-extrabold text-2xl">${a}</div></div>
+        <div id="signo" class="font-titulo font-extrabold text-4xl w-12">?</div>
+        <div class="text-center"><div>${'🧱'.repeat(b)}</div><div class="font-titulo font-extrabold text-2xl">${b}</div></div>
+      </div>
+      <div class="flex justify-center gap-4">
+        ${['>','<','='].map(s => `<button class="oms btn3d bg-white border-4 border-verde rounded-3xl
+          w-16 h-16 font-titulo font-extrabold text-3xl" data-ok="${s===correcto}">${s}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.oms').forEach(btn => btn.addEventListener('click', () => {
+    if (btn.dataset.ok === 'true'){
+      vista.querySelector('#signo').textContent = correcto;
+      btn.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(a + ' ' + correcto + ' ' + b, jMayorMenorIgual);
+    } else UI.error(btn);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar('tocá el signo correcto'), siguiente:jMayorMenorIgual, menu:volverAlMenu });
+  Voz.hablar('tocá el signo correcto');
+}
+
+function jParesImpares(){
+  const n = 1 + Math.floor(Math.random()*10);
+  const correcto = n % 2 === 0 ? 'PAR' : 'IMPAR';
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('PARES O IMPARES','¿ESTE NÚMERO ES PAR O IMPAR?')}
+      <div class="font-titulo font-extrabold text-6xl my-6">${n}</div>
+      <div class="flex justify-center gap-4">
+        <button class="opi btn3d bg-cielo rounded-3xl px-6 py-4 font-titulo font-extrabold text-xl" data-ok="${correcto==='PAR'}">PAR</button>
+        <button class="opi btn3d bg-rosa rounded-3xl px-6 py-4 font-titulo font-extrabold text-xl" data-ok="${correcto==='IMPAR'}">IMPAR</button>
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.opi').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(n + ' ES ' + correcto, jParesImpares);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar(String(n)), siguiente:jParesImpares, menu:volverAlMenu });
+  Voz.hablar(String(n));
+}
+
+function jQueHoraEs(){
+  const h = 1 + Math.floor(Math.random()*12);
+  const opciones = mezclar([h, ...tomar([1,2,3,4,5,6,7,8,9,10,11,12].filter(x => x !== h), 2)]);
+  const angulo = (h % 12) * 30;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('¿QUÉ HORA ES?','MIRÁ EL RELOJ Y TOCÁ LA HORA')}
+      <svg viewBox="0 0 100 100" class="w-36 h-36 sm:w-44 sm:h-44 mx-auto my-3">
+        <circle cx="50" cy="50" r="46" fill="#fff" stroke="#334155" stroke-width="4"/>
+        ${[0,30,60,90,120,150,180,210,240,270,300,330].map(ang => `<line x1="50" y1="8" x2="50" y2="14"
+          stroke="#334155" stroke-width="2" transform="rotate(${ang} 50 50)"/>`).join('')}
+        <line x1="50" y1="50" x2="50" y2="18" stroke="#334155" stroke-width="4" stroke-linecap="round"
+          transform="rotate(${angulo} 50 50)"/>
+        <line x1="50" y1="50" x2="72" y2="50" stroke="#334155" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="50" cy="50" r="4" fill="#334155"/>
+      </svg>
+      <div class="flex justify-center gap-4">
+        ${opciones.map(o => `<button class="oqh btn3d bg-white border-4 border-cielo rounded-3xl
+          w-16 h-16 font-titulo font-extrabold text-xl" data-ok="${o===h}">${o}:00</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA HORA ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.oqh').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('SON LAS ' + h, jQueHoraEs);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar('qué hora es'), siguiente:jQueHoraEs, menu:volverAlMenu });
+  Voz.hablar('qué hora es');
+}
+
+/* ---------- 🔬 CIENCIAS ---------- */
+function jCincoSentidos(){
+  const s = alAzar(CINCO_SENTIDOS);
+  const p = BANCO.buscar(s.usa);
+  const otras = tomar(CINCO_SENTIDOS.filter(x => x !== s), 2);
+  const opciones = mezclar([s, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('LOS 5 SENTIDOS','¿QUÉ SENTIDO USÁS CON ESTA PARTE?')}
+      <div class="my-3">${UI.escena(dibujo(p,'w-24 h-24 sm:w-28 sm:h-28'),'#EDE9FE')}</div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(o => `<button class="osn btn3d bg-white border-4 border-lila rounded-3xl px-4 py-3
+          font-titulo font-extrabold" data-ok="${o.sentido===s.sentido}">${o.emoji} ${o.sentido}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar('qué sentido usás con ' + p.texto);
+  vista.querySelectorAll('.osn').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('CON ' + p.texto + ' USÁS EL ' + s.sentido, jCincoSentidos);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jCincoSentidos, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+function jCicloVida(){
+  const ciclo = alAzar(CICLOS_VIDA);
+  const orden = mezclar(ciclo.pasos.map((p,i) => ({ p, i })));
+  let esperado = 0;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('EL CICLO DE ' + ciclo.nombre, 'TOCÁ LOS PASOS EN ORDEN, DEL PRIMERO AL ÚLTIMO')}
+      <div class="flex flex-wrap justify-center gap-3 my-4">
+        ${orden.map(o => { const bp = BANCO.buscar(o.p);
+          return `<button class="ocv btn3d bg-white border-4 border-verde rounded-3xl px-4 py-3
+          font-titulo font-extrabold" data-i="${o.i}">${bp ? dibujo(bp,'w-12 h-12') : ''}
+          <div class="text-xs mt-1">${o.p}</div></button>`; }).join('')}
+      </div>
+      <div class="flex justify-center gap-1 mb-2">
+        ${ciclo.pasos.map(() => `<span class="paso w-3 h-3 rounded-full bg-tinta/15 inline-block"></span>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO CICLO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.ocv').forEach(b => b.addEventListener('click', () => {
+    const i = +b.dataset.i;
+    if (i === esperado){
+      b.classList.add('pointer-events-none','bg-verde','pop');
+      vista.querySelectorAll('.paso')[esperado].classList.replace('bg-tinta/15','bg-verde');
+      Sonido.ok(); Puntaje.sumar(1); esperado++;
+      if (esperado === ciclo.pasos.length){ Puntaje.sumar(2); UI.festejar('¡ORDENASTE EL CICLO!', jCicloVida); }
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ siguiente:jCicloVida, menu:volverAlMenu });
+  Voz.hablar('tocá los pasos en orden');
+}
+
+function jEstadoTiempo(){
+  const c = alAzar(CLIMA_ROPA);
+  const p = BANCO.buscar(c.ropa);
+  const otras = tomar(CLIMA_ROPA.filter(x => x !== c).map(x => BANCO.buscar(x.ropa)).filter(Boolean), Math.min(2, CLIMA_ROPA.length - 1));
+  const opciones = mezclar([p, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('EL ESTADO DEL TIEMPO', '¿QUÉ TE PONÉS CUANDO HAY ' + c.clima + '?')}
+      <div class="text-6xl my-4">${c.emoji}</div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(o => `<button class="oet btn3d bg-white border-4 border-cielo rounded-3xl p-3
+          flex items-center justify-center" data-ok="${o.plano===p.plano}">${dibujo(o,'w-16 h-16')}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar('qué te ponés cuando hay ' + c.clima);
+  vista.querySelectorAll('.oet').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('CON ' + c.clima + ' TE PONÉS ' + p.texto, jEstadoTiempo);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jEstadoTiempo, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+/* Familia: palabras genéricas de parentesco (mamá, papá, abuela, abuelo,
+   hermano, hermana, tío, tía), NUNCA nombres propios de una familia en
+   particular, así funciona igual sea quien sea el chico que juegue. */
+function jFamilia(){
+  const rol = alAzar(FAMILIA_ROLES);
+  const p = BANCO.buscar(rol);
+  const otras = tomar(FAMILIA_ROLES.filter(r => r !== rol), 2);
+  const opciones = mezclar([rol, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('MI FAMILIA','ESCUCHÁ Y TOCÁ LA PALABRA')}
+      <div class="my-3">${UI.escena(dibujo(p,'w-24 h-24 sm:w-28 sm:h-28'),'#FCE7F3')}</div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(o => `<button class="ofam btn3d bg-white border-4 border-rosa rounded-3xl
+          px-5 py-3 font-titulo font-extrabold text-xl" data-ok="${o===rol}">${o}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar(rol);
+  vista.querySelectorAll('.ofam').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(rol, jFamilia);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jFamilia, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+function jCrias(){
+  const c = alAzar(CRIAS_ANIMALES);
+  const grande = BANCO.buscar(c.grande);
+  const otras = tomar(CRIAS_ANIMALES.filter(x => x !== c).map(x => x.cria), 2);
+  const opciones = mezclar([c.cria, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('CRÍAS DE ANIMALES', '¿CÓMO SE LLAMA LA CRÍA DE ' + grande.texto + '?')}
+      <div class="my-3">${UI.escena(dibujo(grande,'w-24 h-24 sm:w-28 sm:h-28'),'#FEF9C3')}</div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(o => `<button class="ocr btn3d bg-white border-4 border-amarillo rounded-3xl
+          px-4 py-3 font-titulo font-extrabold" data-ok="${o===c.cria}">${o}</button>`).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar('cómo se llama la cría de ' + grande.texto);
+  vista.querySelectorAll('.ocr').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('LA CRÍA DE ' + grande.texto + ' ES ' + c.cria, jCrias);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jCrias, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+/* ---------- 🎨 COLORES Y FORMAS ---------- */
+function jAdivinaSombra(){
+  const candidatos = SOMBRA_OBJETOS.map(w => BANCO.buscar(w)).filter(p => p && Img.tiene(p));
+  const correcto = alAzar(candidatos);
+  const distractores = tomar(candidatos.filter(p => p.plano !== correcto.plano), Math.min(9, candidatos.length - 1));
+  const opciones = mezclar([correcto, ...distractores]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('ADIVINÁ LA SOMBRA','TOCÁ EL DIBUJO QUE HACE JUEGO CON LA SOMBRA')}
+      <div class="my-3">
+        <div class="inline-block bg-tinta/10 rounded-3xl p-4">
+          <div style="filter:brightness(0);opacity:.85">${dibujo(correcto,'w-24 h-24 sm:w-28 sm:h-28')}</div>
+        </div>
+      </div>
+      <div class="grid grid-cols-5 gap-2 max-w-xl mx-auto">
+        ${opciones.map(p => `<button class="osom btn3d bg-white border-4 border-naranja rounded-2xl
+          aspect-square flex items-center justify-center p-1" data-ok="${p.plano===correcto.plano}">
+          ${dibujo(p,'w-full h-full')}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA SOMBRA ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.osom').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('¡ERA ' + correcto.texto + '!', jAdivinaSombra);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ siguiente:jAdivinaSombra, menu:volverAlMenu });
+  Voz.hablar('tocá el dibujo que hace juego con la sombra');
+}
+
+const FORMAS_CLASIFICAR = ['circulo','cuadrado','triangulo','estrella'];
+function jClasificadorGeometrico(){
+  const elegidas = tomar(FORMAS_CLASIFICAR, 3);
+  const piezas = elegidas.flatMap(id => [id, id]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('CLASIFICADOR GEOMÉTRICO','ARRASTRÁ CADA FORMA A SU CONTENEDOR')}
+      <div class="flex flex-wrap justify-center gap-2 my-4">
+        ${mezclar([...piezas]).map(id => { const f = FORMAS.find(x=>x.id===id);
+          return `<div class="ffg btn3d bg-white border-4 border-naranja rounded-2xl p-2" data-val="${id}">
+            <svg viewBox="0 0 100 100" class="w-10 h-10" fill="#FB923C">${f.svg}</svg></div>`;
+        }).join('')}
+      </div>
+      <div class="grid grid-cols-3 gap-2 max-w-md mx-auto">
+        ${elegidas.map(id => { const f = FORMAS.find(x=>x.id===id);
+          return `<div class="zfg rounded-3xl bg-naranja/20 border-4 border-dashed border-naranja
+            p-2 min-h-[7rem]" data-val="${id}">
+            <svg viewBox="0 0 100 100" class="w-8 h-8 mx-auto" fill="#334155">${f.svg}</svg>
+            <div class="font-titulo font-extrabold text-xs">${f.nombre}</div>
+            <div class="dentro flex flex-wrap justify-center gap-1 mt-1"></div>
+          </div>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRAS ➡️' })}
+    </div>`;
+  let ok = 0;
+  vista.querySelectorAll('.zfg').forEach(z => Drag.zona(z));
+  vista.querySelectorAll('.ffg').forEach(f => Drag.ficha(f));
+  Drag.alSoltar((z, f) => {
+    if (!z.matches('.zfg')) return;
+    if (z.dataset.val === f.dataset.val){
+      z.querySelector('.dentro').insertAdjacentHTML('beforeend', '<span class="pop text-lg">✅</span>');
+      f.classList.add('invisible','pointer-events-none');
+      Sonido.ok(); Puntaje.sumar(1);
+      if (++ok === piezas.length){ Puntaje.sumar(2); UI.festejar('¡TODO CLASIFICADO!', jClasificadorGeometrico); }
+    } else UI.error(z);
+  });
+  UI.conectarBarra({ siguiente:jClasificadorGeometrico, menu:volverAlMenu });
+  Voz.hablar('arrastrá cada forma a su contenedor');
+}
+
+function jDetectiveFormas(){
+  const d = alAzar(DETECTIVE_FORMAS);
+  const p = BANCO.buscar(d.objeto);
+  const otras = [...new Set(tomar(DETECTIVE_FORMAS.filter(x => x.forma !== d.forma).map(x => x.forma), 2))];
+  const opciones = mezclar([d.forma, ...otras]);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('DETECTIVE DE FORMAS','¿A QUÉ FORMA SE PARECE?')}
+      <div class="my-3">${UI.escena(dibujo(p,'w-24 h-24 sm:w-28 sm:h-28'),'#FFF7ED')}</div>
+      <div class="flex justify-center gap-4">
+        ${opciones.map(id => { const f = FORMAS.find(x=>x.id===id);
+          return `<button class="odf btn3d bg-white border-4 border-naranja rounded-2xl p-3 w-16 h-16"
+            data-ok="${id===d.forma}"><svg viewBox="0 0 100 100" fill="#334155">${f.svg}</svg></button>`;
+        }).join('')}
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  const decir = () => Voz.hablar('a qué forma se parece ' + p.texto);
+  vista.querySelectorAll('.odf').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(p.texto + ' SE PARECE A UN ' + FORMAS.find(x=>x.id===d.forma).nombre, jDetectiveFormas);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:decir, siguiente:jDetectiveFormas, menu:volverAlMenu });
+  setTimeout(decir, 400);
+}
+
+function jColorPatron(){
+  const base = tomar(COLORES_JUEGO, 3);
+  const molde = alAzar([[0,1,0,1,0,1], [0,1,2,0,1,2], [0,0,1,0,0,1]]);
+  const serie = molde.map(i => base[i]);
+  const falta = serie[serie.length - 1];
+  const visibles = serie.slice(0, -1);
+  const opciones = mezclar([falta, ...tomar(base.filter(c => c !== falta), 2)]);
+  const bola = c => `<span class="inline-block w-10 h-10 sm:w-12 sm:h-12 rounded-full"
+    style="background:${COLORES_CSS_LOCAL[c] || '#CBD5E1'};border:4px solid rgba(0,0,0,.15)"></span>`;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('EL COLLAR DE COLORES','MIRÁ EL ORDEN Y ELEGÍ EL QUE FALTA')}
+      <div class="bg-crema rounded-3xl border-4 border-naranja/60 p-4 my-5 flex flex-wrap items-center justify-center gap-2">
+        ${visibles.map(bola).join('')}
+        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-naranja/20 border-4 border-dashed border-naranja
+          flex items-center justify-center font-titulo font-extrabold">?</div>
+      </div>
+      <div class="flex flex-wrap justify-center gap-3">
+        ${opciones.map(c => `<button class="ocp btn3d bg-white border-4 border-naranja rounded-3xl p-2"
+          data-ok="${c===falta}">${bola(c)}</button>`).join('')}
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.ocp').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar('SIGUE ' + falta, jColorPatron);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ siguiente:jColorPatron, menu:volverAlMenu });
+  Voz.hablar('qué color sigue');
+}
+
+function jFormaGrande(){
+  const f = alAzar(FORMAS);
+  const pedirGrande = Math.random() < 0.5;
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('GRANDE O CHICA', pedirGrande ? 'TOCÁ LA MÁS GRANDE' : 'TOCÁ LA MÁS CHICA')}
+      <div class="flex items-end justify-center gap-6 my-8">
+        <button class="ogc btn3d bg-white border-4 border-cielo rounded-3xl p-2" data-ok="${!pedirGrande}">
+          <svg viewBox="0 0 100 100" class="w-14 h-14" fill="#2563EB">${f.svg}</svg></button>
+        <button class="ogc btn3d bg-white border-4 border-cielo rounded-3xl p-2" data-ok="${pedirGrande}">
+          <svg viewBox="0 0 100 100" class="w-28 h-28" fill="#2563EB">${f.svg}</svg></button>
+      </div>
+      ${UI.barra({ escuchar:false, textoSiguiente:'OTRA ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.ogc').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.ok === 'true'){
+      b.classList.add('pop','bg-verde'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(pedirGrande ? '¡ESA ES LA MÁS GRANDE!' : '¡ESA ES LA MÁS CHICA!', jFormaGrande);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar(pedirGrande ? 'tocá la más grande' : 'tocá la más chica'), siguiente:jFormaGrande, menu:volverAlMenu });
+  Voz.hablar(pedirGrande ? 'tocá la más grande' : 'tocá la más chica');
+}
+
+const COLORES_PRIMARIOS = ['ROJO','AZUL','AMARILLO'];
+function jColoresPrimarios(){
+  const esPrimario = Math.random() < 0.6;
+  const secundarios = COLORES_JUEGO.filter(c => !COLORES_PRIMARIOS.includes(c));
+  const c = esPrimario ? alAzar(COLORES_PRIMARIOS) : alAzar(secundarios);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('COLORES PRIMARIOS','¿ESTE COLOR ES PRIMARIO?')}
+      <div class="my-5">${Img.html(BANCO.buscar(c),'w-24 h-24 sm:w-28 sm:h-28',{comoColor:true})}</div>
+      <p class="font-titulo font-extrabold text-2xl mb-3">${c}</p>
+      <div class="flex justify-center gap-5">
+        <button class="rpp btn3d bg-verde rounded-3xl w-28 h-28 text-4xl font-titulo font-extrabold" data-r="true">SÍ</button>
+        <button class="rpp btn3d bg-rosa rounded-3xl w-28 h-28 text-4xl font-titulo font-extrabold" data-r="false">NO</button>
+      </div>
+      ${UI.barra({ textoSiguiente:'OTRO ➡️' })}
+    </div>`;
+  vista.querySelectorAll('.rpp').forEach(b => b.addEventListener('click', () => {
+    if ((b.dataset.r === 'true') === esPrimario){
+      b.classList.add('pop'); Sonido.ok(); Puntaje.sumar(2);
+      UI.festejar(esPrimario ? c + ' ES PRIMARIO' : c + ' NO ES PRIMARIO', jColoresPrimarios);
+    } else UI.error(b);
+  }));
+  UI.conectarBarra({ escuchar:() => Voz.hablar(c), siguiente:jColoresPrimarios, menu:volverAlMenu });
+  Voz.hablar(c);
+}
+
+/* ---------- ✏️ CALIGRAFÍA: dibujo libre con guía de fondo ---------- */
+function jDibujoAsistido(){
+  const dib = alAzar(DIBUJOS_PINTAR);
+  vista.innerHTML = `
+    <div class="text-center">
+      ${UI.consigna('DIBUJO LIBRE ASISTIDO','SEGUÍ LAS LÍNEAS COMO GUÍA Y DIBUJÁ ENCIMA')}
+      <div class="relative bg-white rounded-3xl border-4 border-lila/60 p-2 my-3 mx-auto" style="width:300px">
+        <svg viewBox="0 0 300 230" class="absolute inset-2 pointer-events-none" style="opacity:.25">
+          <g fill="none" stroke="#334155" stroke-width="4">${dib.lineas}</g>
+        </svg>
+        <canvas id="pzA" width="300" height="230" class="w-full touch-none rounded-2xl relative"></canvas>
+      </div>
+      <div class="flex flex-wrap justify-center gap-2 mb-3">
+        ${PALETA_PIZARRA.map((c, i) => `<button class="pzca btn3d rounded-full w-10 h-10 sm:w-12 sm:h-12
+          ${i === 1 ? 'ring-4 ring-tinta/40' : ''}" data-i="${i}"
+          style="background:${c};border:3px solid rgba(0,0,0,.18)"></button>`).join('')}
+      </div>
+      <div class="flex flex-wrap justify-center gap-3 no-sel">
+        <button id="bLimpiarA" class="btn3d bg-rosa rounded-3xl px-6 py-4 font-titulo font-extrabold">🧽 LIMPIAR</button>
+        <button id="bOtroDibA" class="btn3d bg-cielo rounded-3xl px-6 py-4 font-titulo font-extrabold">🖼️ OTRO DIBUJO</button>
+        <button id="bb-menu" class="btn3d bg-white border-2 border-tinta/10 rounded-3xl px-6 py-4 font-titulo font-bold">🏠 MENÚ</button>
+      </div>
+    </div>`;
+
+  const cv = vista.querySelector('#pzA'), cx = cv.getContext('2d');
+  let color = PALETA_PIZARRA[1], grosor = 8, pintando = false, ultimo = null;
+  function posDe(e){
+    const r = cv.getBoundingClientRect(); const esc = cv.width / r.width;
+    const p = e.touches ? e.touches[0] : e;
+    return { x:(p.clientX-r.left)*esc, y:(p.clientY-r.top)*esc };
+  }
+  function trazarLinea(a,b){
+    cx.strokeStyle = color; cx.lineWidth = grosor; cx.lineCap='round'; cx.lineJoin='round';
+    cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y); cx.stroke();
+    cx.beginPath(); cx.arc(b.x,b.y,grosor/2,0,Math.PI*2); cx.fillStyle=color; cx.fill();
+  }
+  const empezar = e => { e.preventDefault(); pintando=true; ultimo=posDe(e); trazarLinea(ultimo,ultimo); };
+  const mover   = e => { if (!pintando) return; e.preventDefault(); const p=posDe(e); trazarLinea(ultimo,p); ultimo=p; };
+  const soltar  = () => { pintando=false; ultimo=null; };
+  cv.addEventListener('mousedown', empezar); cv.addEventListener('mousemove', mover); addEventListener('mouseup', soltar);
+  cv.addEventListener('touchstart', empezar, {passive:false}); cv.addEventListener('touchmove', mover, {passive:false});
+  cv.addEventListener('touchend', soltar);
+  vista.querySelectorAll('.pzca').forEach(b => b.addEventListener('click', () => {
+    vista.querySelectorAll('.pzca').forEach(x => x.classList.remove('ring-4','ring-tinta/40'));
+    b.classList.add('ring-4','ring-tinta/40'); color = PALETA_PIZARRA[+b.dataset.i]; Sonido.toque();
+  }));
+  vista.querySelector('#bLimpiarA').addEventListener('click', () => { cx.clearRect(0,0,cv.width,cv.height); Sonido.toque(); });
+  vista.querySelector('#bOtroDibA').addEventListener('click', jDibujoAsistido);
+  vista.querySelector('#bb-menu').addEventListener('click', volverAlMenu);
+  Voz.hablar('seguí las líneas como guía y dibujá encima');
+}
+
+/* ---------- 🎈 RECREO: XILÓFONO / PIANO ---------- */
+const NOTAS_XILOFONO = [
+  { nombre:'DO', freq:262, color:'#EF4444' }, { nombre:'RE', freq:294, color:'#FB923C' },
+  { nombre:'MI', freq:330, color:'#FACC15' }, { nombre:'FA', freq:349, color:'#22C55E' },
+  { nombre:'SOL',freq:392, color:'#2563EB' }, { nombre:'LA', freq:440, color:'#8B5CF6' },
+  { nombre:'SI', freq:494, color:'#D946EF' }, { nombre:'DO', freq:523, color:'#EF4444' }
+];
+/* Melodías fáciles, como secuencia de índices de NOTAS_XILOFONO (0=DO grave … 7=DO agudo) */
+const CANCIONES_XILOFONO = [
+  { nombre:'ESTRELLITA',        notas:[0,0,4,4,5,5,4, 3,3,2,2,1,1,0] },
+  { nombre:'ARROZ CON LECHE',   notas:[4,4,4,2,4,5,5] },
+  { nombre:'CUMPLEAÑOS FELIZ',  notas:[0,0,1,0,3,2] },
+  { nombre:'CINCO LOBITOS',     notas:[4,4,4,2,4,4,4,2] },
+  { nombre:'LOS POLLITOS',      notas:[2,2,0,4,4,2] }
+];
+function jXilofono(){
+  let modo = 'libre', cancionSel = null, secuenciaChico = [], reproduciendo = false;
+
+  function pintar(){
+    vista.innerHTML = `
+      <div class="text-center">
+        ${UI.consigna('XILÓFONO', modo === 'libre' ? 'TOCÁ LAS TECLAS COMO QUIERAS' : 'ESCUCHÁ LA CANCIÓN Y REPETILA TOCANDO LAS TECLAS')}
+        <div class="flex justify-center gap-2 my-2">
+          <button data-m="libre" class="btn3d ${modo==='libre'?'bg-verde':'bg-white border-2 border-tinta/10'}
+            rounded-2xl px-4 py-2 font-titulo font-extrabold text-sm">🎵 MODO LIBRE</button>
+          <button data-m="simon" class="btn3d ${modo==='simon'?'bg-verde':'bg-white border-2 border-tinta/10'}
+            rounded-2xl px-4 py-2 font-titulo font-extrabold text-sm">🎧 SIMÓN DICE</button>
+        </div>
+        ${modo === 'simon' ? `
+        <div class="flex flex-wrap justify-center gap-2 my-2">
+          ${CANCIONES_XILOFONO.map(c => `<button data-c="${c.nombre}" class="btn3d
+            ${cancionSel && cancionSel.nombre===c.nombre ? 'bg-amarillo' : 'bg-white border-2 border-tinta/10'}
+            rounded-2xl px-3 py-2 font-titulo font-bold text-xs">${c.nombre}</button>`).join('')}
+        </div>
+        <button id="bEscucharCancion" class="btn3d bg-cielo rounded-2xl px-5 py-3 my-2 font-titulo font-extrabold"
+          ${cancionSel ? '' : 'disabled style="opacity:.4"'}>▶️ ESCUCHAR Y REPETIR</button>
+        <p class="font-titulo font-bold text-sm text-tinta/60">TU TURNO: <span id="progSimon">0</span> / ${cancionSel ? cancionSel.notas.length : '—'}</p>
+        ` : ''}
+        <div class="flex justify-center gap-1 my-4" id="teclado">
+          ${NOTAS_XILOFONO.map((n, i) => `<button data-i="${i}" class="tecla btn3d rounded-xl
+            w-9 h-24 sm:w-11 sm:h-28 font-titulo font-extrabold text-xs flex items-end justify-center pb-1"
+            style="background:${n.color};color:#fff">${n.nombre}</button>`).join('')}
+        </div>
+        <div class="flex justify-center gap-3 no-sel mt-2">
+          <button id="bb-menu" class="btn3d bg-white border-2 border-tinta/10 rounded-3xl px-6 py-4 font-titulo font-bold">🏠 MENÚ</button>
+        </div>
+      </div>`;
+
+    vista.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => {
+      modo = b.dataset.m; cancionSel = null; secuenciaChico = []; Sonido.toque(); pintar();
+    }));
+    if (modo === 'simon'){
+      vista.querySelectorAll('[data-c]').forEach(b => b.addEventListener('click', () => {
+        cancionSel = CANCIONES_XILOFONO.find(c => c.nombre === b.dataset.c);
+        secuenciaChico = []; Sonido.toque(); pintar();
+      }));
+      const bEsc = vista.querySelector('#bEscucharCancion');
+      if (bEsc) bEsc.addEventListener('click', () => cancionSel && reproducirCancion(cancionSel));
+    }
+    vista.querySelectorAll('.tecla').forEach(b => b.addEventListener('click', () => {
+      if (reproduciendo) return;
+      const i = +b.dataset.i;
+      Sonido.nota(NOTAS_XILOFONO[i].freq);
+      b.classList.add('pop');
+      if (modo === 'simon' && cancionSel){
+        secuenciaChico.push(i);
+        const k = secuenciaChico.length - 1;
+        if (cancionSel.notas[k] !== i){
+          UI.error(b); secuenciaChico = [];
+          const prog = vista.querySelector('#progSimon'); if (prog) prog.textContent = '0';
+          return;
+        }
+        const prog = vista.querySelector('#progSimon'); if (prog) prog.textContent = secuenciaChico.length;
+        if (secuenciaChico.length === cancionSel.notas.length){
+          Puntaje.sumar(5);
+          UI.festejar('¡TOCASTE ' + cancionSel.nombre + '!', () => { secuenciaChico = []; pintar(); });
+        }
+      }
+    }));
+    vista.querySelector('#bb-menu').addEventListener('click', volverAlMenu);
+  }
+
+  function reproducirCancion(c){
+    reproduciendo = true;
+    c.notas.forEach((i, k) => {
+      setTimeout(() => {
+        const tecla = vista.querySelectorAll('.tecla')[i];
+        Sonido.nota(NOTAS_XILOFONO[i].freq);
+        if (tecla){ tecla.classList.add('pop'); setTimeout(() => tecla.classList.remove('pop'), 200); }
+        if (k === c.notas.length - 1) setTimeout(() => { reproduciendo = false; }, 350);
+      }, k * 450);
+    });
+  }
+
+  pintar();
+  Voz.hablar('tocá las teclas del xilófono');
+}
+
+/* ==================================================================
    REGISTRO DE JUEGOS
    ================================================================== */
 const LANZAR = {
@@ -4157,7 +5392,36 @@ const LANZAR = {
   numeros: () => trazar(NUMEROS_DEMO,   'NÚMEROS'),
   trazos:  () => trazar(TRAZOS_PREVIOS, 'TRAZOS'),
   palabras: jEscribirPalabras,
-  pizarra: jPizarra,       animal: jBuscaAnimal,  intruso: jIntruso, stickers: jStickers
+  pizarra: jPizarra,       animal: jBuscaAnimal,  intruso: jIntruso, stickers: jStickers,
+
+  /* ---- ampliación a 10 por bloque ---- */
+  letraini: jLetraInicial, silfalt: jSilabaFaltante, ahorcado: jAhorcado,
+  trendias: jTrenDias,     calendmes: jCalendarioMeses, rima: jRima,
+
+  opuestos: jOpuestos,     parejaslogica: jParejasLogica, diferencias: jDiferencias,
+  clasificlog: jClasificadorLogica, laberintolog: jLaberintoLogico, logintruso: jIntruso,
+
+  ingcolores:  () => jInglesTema('colores'),  ingcuerpo:   () => jInglesTema('cuerpo'),
+  ingcomida:   () => jInglesTema('comida'),   inganimales: () => jInglesTema('animales'),
+  ingclima:    () => jInglesTema('clima'),    ingtiempo:   () => jInglesTema('tiempo'),
+
+  bloqueslego: jBloquesLego, sumaconstr: jSumaConstructora, tangram: jTangram,
+  mayormenor:  jMayorMenorIgual, paresimpares: jParesImpares, quehoraes: jQueHoraEs,
+
+  sentidos: jCincoSentidos, ciclovida: jCicloVida, estadotiempo: jEstadoTiempo,
+  familia:  jFamilia,       crias: jCrias,        diferenciasciencia: jDiferencias,
+
+  sombra: jAdivinaSombra,   clasifgeo: jClasificadorGeometrico, detformas: jDetectiveFormas,
+  colorpatron: jColorPatron, formagrande: jFormaGrande, colorespri: jColoresPrimarios,
+
+  minombre: jMiNombre,
+  unirpuntos:     () => trazar(FORMAS_TRAZO,       'TRAZOS'),
+  laberintotrazo: () => trazar(LABERINTOS_TRAZO,   'TRAZOS'),
+  dibujoasistido: jDibujoAsistido,
+  montescal:      () => trazar(MONTANIAS_ESCALERAS,'TRAZOS'),
+  olascarac:      () => trazar(OLAS_CARACOLES,     'TRAZOS'),
+
+  xilofono: jXilofono
 };
 
 /* ==================================================================
